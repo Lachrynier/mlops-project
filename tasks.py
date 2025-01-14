@@ -31,6 +31,11 @@ def dev_requirements(ctx: Context) -> None:
 
 # Project commands
 @task
+def download_data(ctx: Context) -> None:
+    """Download data from caltech"""
+    ctx.run(f"python src/{PROJECT_NAME}/data.py", echo=True, pty=not WINDOWS)
+
+@task
 def preprocess_data(ctx: Context) -> None:
     """Preprocess data."""
     ctx.run(f"python src/{PROJECT_NAME}/data.py data/raw data/processed", echo=True, pty=not WINDOWS)
