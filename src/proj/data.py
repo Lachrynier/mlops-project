@@ -1,29 +1,52 @@
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, TensorDataset, Subset, random_split
+
+import os
 from pathlib import Path
 
-import typer
-from torch.utils.data import Dataset
+def preprocess_subset(num_classes=10, file_name='subset', test_ratio=0.2):
+    """
+    num_classes: The first number of classes to be used in the subset.
+    """
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
+    ])
 
+    dataset = datasets.ImageFolder(
+        root='./data/raw/caltech256/256_ObjectCategories',
+        transform=transform
+    )
+    
+    # Only keep the indices for the first num_class classes
+    subset = Subset(
+        dataset,
+        [i for i in dataset.targets if i < num_classes]
+    )
 
-class MyDataset(Dataset):
-    """My custom dataset."""
+    test_size = int(len(subset) * test_ratio)
+    train_size = len(subset) - test_size
+    train_subset, test_subset = random_split(subset, [train_size, test_size])
 
-    def __init__(self, raw_data_path: Path) -> None:
-        self.data_path = raw_data_path
+    train_images = torch.stack([train_subset[i][0] for i in range(len(train_subset))])
+    train_labels = torch.tensor([train_subset[i][1] for i in range(len(train_subset))])
 
-    def __len__(self) -> int:
-        """Return the length of the dataset."""
+    test_images = torch.stack([test_subset[i][0] for i in range(len(test_subset))])
+    test_labels = torch.tensor([test_subset[i][1] for i in range(len(test_subset))])
 
-    def __getitem__(self, index: int):
-        """Return a given sample from the dataset."""
+    torch.save(
+        TensorDataset(train_images, train_labels),
+        f'./data/processed/{file_name}_train.pt'
+    )
+    torch.save(
+        TensorDataset(test_images, test_labels),
+        f'./data/processed/{file_name}_test.pt'
+    )
 
-    def preprocess(self, output_folder: Path) -> None:
-        """Preprocess the raw data and save it to the output folder."""
+def preprocess_full():
+    preprocess_subset(num_classes=257, file_name='dataset')
 
-def preprocess(raw_data_path: Path, output_folder: Path) -> None:
-    print("Preprocessing data...")
-    dataset = MyDataset(raw_data_path)
-    dataset.preprocess(output_folder)
-
-
-if __name__ == "__main__":
-    typer.run(preprocess)
+if __name__ == '__main__':
+    preprocess_subset(num_classes=10)
