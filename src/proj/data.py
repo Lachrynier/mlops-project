@@ -1,3 +1,8 @@
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data import Dataset, TensorDataset, Subset, random_split
+
+import os
 import io
 import tarfile
 from collections.abc import Callable
@@ -7,8 +12,6 @@ import typer
 import requests
 from tqdm import tqdm
 from pathlib import Path
-
-from torch.utils.data import Dataset
 
 class Caltech256(Dataset):
     """My custom dataset."""
@@ -72,16 +75,59 @@ class Caltech256(Dataset):
 
         return image, target
 
-    def preprocess(self, output_folder: Path) -> None:
-        """Preprocess the raw data and save it to the output folder."""
+def preprocess_subset(
+        num_classes: int | str = 'full',
+        test_ratio=0.2
+    ):
+    """
+    num_classes: The first number of classes to be used in the subset.
+                 Setting it to 'full' chooses all classes.
+    """
+    if isinstance(num_classes, str):
+        num_classes = 257 # all classes
+    
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
+    ])
 
-def preprocess(raw_data_path: Path, output_folder: Path) -> None:
-    print("Preprocessing data...")
-    dataset = Caltech256(raw_data_path)
-    dataset.preprocess(output_folder)
+    dataset = datasets.ImageFolder(
+        root='./data/raw/256_ObjectCategories',
+        transform=transform
+    )
+    
+    # Only keep the indices for the first num_class classes
+    subset = Subset(
+        dataset,
+        [i for i in dataset.targets if i < num_classes]
+    )
 
-def main(root: Path = Path("data/raw")):
-    dataset = Caltech256(root=root, download=True)
+    test_size = int(len(subset) * test_ratio)
+    train_size = len(subset) - test_size
+    train_subset, test_subset = random_split(subset, [train_size, test_size])
 
-if __name__ == "__main__":
+    train_images = torch.stack([train_subset[i][0] for i in range(len(train_subset))])
+    train_labels = torch.tensor([train_subset[i][1] for i in range(len(train_subset))])
+
+    test_images = torch.stack([test_subset[i][0] for i in range(len(test_subset))])
+    test_labels = torch.tensor([test_subset[i][1] for i in range(len(test_subset))])
+
+    torch.save(
+        TensorDataset(train_images, train_labels),
+        f'./data/processed/subset{num_classes}_train.pt'
+    )
+    torch.save(
+        TensorDataset(test_images, test_labels),
+        f'./data/processed/subset{num_classes}_test.pt'
+    )
+
+def main(
+        num_classes: int | str = 10,
+        root: Path = Path("data/raw")
+    ):
+    Caltech256(root=root, download=True)
+    preprocess_subset(num_classes=num_classes)
+
+if __name__ == '__main__':
     typer.run(main)
