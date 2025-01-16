@@ -24,20 +24,30 @@ class Caltech256(Dataset):
         download: bool = False,
     ) -> None:
         self.root = Path(root)
-        self.data_dir = self.root / "256_ObjectCategories"
+        self.tar_path = self.root / "256_ObjectCategories.tar"
         self.transform = transform
         self.target_transform = target_transform
 
         if download:
             self._download()
 
-        if not self.data_dir.exists():
+        if not self.tar_path.exists():
             raise RuntimeError("Dataset not found. Perhaps you forgot to use download=True?")
 
-        self.image_paths = [image_file for category_dir in self.data_dir.iterdir() for image_file in category_dir.iterdir() if image_file.suffix == ".jpg"]
+        self.tar = tarfile.open(self.tar_path, mode="r:")
+
+        self.targets = []
+        self.imgs = []
+
+        for member in self.tar.getmembers():
+            if not member.name.endswith(".jpg"):
+                continue
+
+            self.imgs.append(member.name)
+            self.targets.append(int(member.name.split("/")[2][0:3]) - 1)
 
     def _download(self) -> None:
-        if self.data_dir.exists():
+        if self.tar_path.exists():
            return
 
         url = "https://data.caltech.edu/records/nyy15-4j048/files/256_ObjectCategories.tar"
@@ -45,27 +55,19 @@ class Caltech256(Dataset):
         total_size = int(response.headers.get("content-length", 0))
         chunk_size = 4096
 
-        # For some reason tarfile does not like getting the bytes directly, so use io.BytesIO to pretend it is a file
-        buffer = io.BytesIO()
-
         with tqdm(desc="Downloading '256_ObjectCategories.tar'", total=total_size, unit="B", unit_scale=True) as progress_bar:
-            for data in response.iter_content(chunk_size):
-                buffer.write(data)
-                progress_bar.update(len(data))
-
-        buffer.seek(0)
-
-        with tarfile.open(fileobj=buffer, mode="r:") as tar:
-            tar.extractall(self.root, filter='data')
+            with open(self.tar_path, "wb") as tar_file:
+                for data in response.iter_content(chunk_size):
+                    tar_file.write(data)
+                    progress_bar.update(len(data))
 
     def __len__(self) -> int:
-        return len(self.image_paths)
+        return len(self.imgs)
 
     def __getitem__(self, index: int):
-        image_path = self.image_paths[index]
 
-        image = Image.open(image_path)
-        target = int(image_path.parent.name[0:3]) - 1
+        image = Image.open(self.tar.extractfile(self.imgs[index]))
+        target = self.targets[index]
 
         if self.transform is not None:
             image = self.transform(image)
@@ -76,6 +78,7 @@ class Caltech256(Dataset):
         return image, target
 
 def preprocess_subset(
+        root: Path | str,
         num_classes: int | str = 'full',
         test_ratio=0.2
     ):
@@ -85,18 +88,17 @@ def preprocess_subset(
     """
     if isinstance(num_classes, str):
         num_classes = 257 # all classes
-    
+
+
     transform = transforms.Compose([
+        transforms.Lambda(lambda img: img.convert('RGB')),
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
     ])
 
-    dataset = datasets.ImageFolder(
-        root='./data/raw/256_ObjectCategories',
-        transform=transform
-    )
-    
+    dataset = Caltech256(root=root, transform=transform, download=True)
+
     # Only keep the indices for the first num_class classes
     subset = Subset(
         dataset,
@@ -123,11 +125,10 @@ def preprocess_subset(
     )
 
 def main(
-        num_classes: int | str = 10,
-        root: Path = Path("data/raw")
-    ):
-    Caltech256(root=root, download=True)
-    preprocess_subset(num_classes=num_classes)
+    root: Path = Path("data/raw"),
+    num_classes: int = 257,
+):
+    preprocess_subset(root=root, num_classes=num_classes)
 
 if __name__ == '__main__':
     typer.run(main)
