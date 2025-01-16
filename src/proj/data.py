@@ -3,7 +3,6 @@ import tarfile
 from collections.abc import Callable
 from PIL import Image
 
-
 import typer
 import requests
 from tqdm import tqdm
@@ -33,8 +32,6 @@ class Caltech256(Dataset):
             raise RuntimeError("Dataset not found. Perhaps you forgot to use download=True?")
 
         self.image_paths = [image_file for category_dir in self.data_dir.iterdir() for image_file in category_dir.iterdir() if image_file.suffix == ".jpg"]
-
-
 
     def _download(self) -> None:
         if self.data_dir.exists():
