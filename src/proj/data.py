@@ -78,17 +78,17 @@ class Caltech256(Dataset):
         return image, target
 
 def preprocess_subset(
-        root: Path | str,
-        num_classes: int | str = 'full',
-        test_ratio=0.2
+        root: str,
+        num_classes: int | None = None,
+        test_ratio = 0.2,
+        download: bool = False,
     ):
     """
     num_classes: The first number of classes to be used in the subset.
-                 Setting it to 'full' chooses all classes.
+                 Setting it to None chooses all classes.
     """
-    if isinstance(num_classes, str):
+    if num_classes is None:
         num_classes = 257 # all classes
-
 
     transform = transforms.Compose([
         transforms.Lambda(lambda img: img.convert('RGB')),
@@ -97,7 +97,7 @@ def preprocess_subset(
         transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
     ])
 
-    dataset = Caltech256(root=root, transform=transform, download=True)
+    dataset = Caltech256(root=root, transform=transform, download=download)
 
     # Only keep the indices for the first num_class classes
     subset = Subset(
@@ -125,10 +125,10 @@ def preprocess_subset(
     )
 
 def main(
-    root: Path = Path("data/raw"),
-    num_classes: int = 257,
-):
-    preprocess_subset(root=root, num_classes=num_classes)
+        num_classes: int = None,
+        download: bool = True
+    ):
+    preprocess_subset(root = "data/raw", num_classes=num_classes, download=download)
 
 if __name__ == '__main__':
     typer.run(main)
