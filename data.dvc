@@ -1,6 +1,11 @@
 outs:
-- md5: 412ac132acf20c55b59e3785b66902e3.dir
-  size: 1183006720
-  nfiles: 1
-  hash: md5
+- hash: md5
   path: data
+  files:
+  - relpath: raw/256_ObjectCategories.tar
+    md5: 67b4f42ca05d46448c6bb8ecd2220f6d
+    size: 1183006720
+    cloud:
+      remote_storage:
+        etag: 08e289bb98dffa8a031001
+        version_id: '1737047766123746'

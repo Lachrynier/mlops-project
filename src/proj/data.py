@@ -50,6 +50,8 @@ class Caltech256(Dataset):
         if self.tar_path.exists():
            return
 
+        self.root.mkdir(parents=True, exist_ok=True)
+
         url = "https://data.caltech.edu/records/nyy15-4j048/files/256_ObjectCategories.tar"
         response = requests.get(url, stream=True)
         total_size = int(response.headers.get("content-length", 0))
@@ -114,6 +116,8 @@ def preprocess_subset(
 
     test_images = torch.stack([test_subset[i][0] for i in range(len(test_subset))])
     test_labels = torch.tensor([test_subset[i][1] for i in range(len(test_subset))])
+
+    os.makedirs("./data/processed", exist_ok=True)
 
     torch.save(
         TensorDataset(train_images, train_labels),
