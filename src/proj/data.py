@@ -130,4 +130,5 @@ def main(
     preprocess_subset(num_classes=num_classes)
 
 if __name__ == '__main__':
-    typer.run(main)
+    # typer.run(main)
+    preprocess_subset(num_classes=10)
