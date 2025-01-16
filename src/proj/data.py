@@ -76,16 +76,15 @@ class Caltech256(Dataset):
         return image, target
 
 def preprocess_subset(
-        num_classes: int | str = 'full',
+        num_classes: int | None = None,
         test_ratio=0.2
     ):
     """
     num_classes: The first number of classes to be used in the subset.
-                 Setting it to 'full' chooses all classes.
+                 Setting it to None chooses all classes.
     """
-    if isinstance(num_classes, str):
+    if num_classes is None:
         num_classes = 257 # all classes
-    
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
@@ -123,10 +122,11 @@ def preprocess_subset(
     )
 
 def main(
-        num_classes: int | str = 10,
-        root: Path = Path("data/raw")
+        num_classes: int = None,
+        download: bool = False
     ):
-    Caltech256(root=root, download=True)
+    if download:
+        Caltech256(root='data/raw', download=download)
     preprocess_subset(num_classes=num_classes)
 
 if __name__ == '__main__':
