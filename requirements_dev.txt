@@ -9,5 +9,5 @@ ruff==0.9.1
 
 # docs
 mkdocs==1.5.3
-mkdocs-material==9.4.6
+mkdocs-material==9.5.49
 mkdocstrings-python==1.12.2
