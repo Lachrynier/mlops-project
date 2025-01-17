@@ -11,7 +11,7 @@ from proj.model import create_model
 def train(lr: float=1e-3):
 
     batch_size = 32
-    epochs = 1
+    epochs = 5
 
     run = wandb.init(
         project="MLOps_project",
@@ -22,8 +22,8 @@ def train(lr: float=1e-3):
 
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
-    train_dataset = torch.load("data/processed/subset10_train.pt", weights_only=True)
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
+    train_dataset = torch.load("data/processed/subset10_train.pt", weights_only=False)
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     model = create_model(num_classes=10).to(device)
 

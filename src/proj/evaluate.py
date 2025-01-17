@@ -14,7 +14,7 @@ def evaluate(model_checkpoint: str):
     model.load_state_dict(torch.load(model_checkpoint, weights_only=True))
 
     test_dataset = torch.load("data/processed/subset10_test.pt")
-    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
     model.eval()
     correct = 0

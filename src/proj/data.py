@@ -104,7 +104,7 @@ def preprocess_subset(
     # Only keep the indices for the first num_class classes
     subset = Subset(
         dataset,
-        [i for i in dataset.targets if i < num_classes]
+        [i for i, target in enumerate(dataset.targets) if target < num_classes]
     )
 
     test_size = int(len(subset) * test_ratio)
