@@ -1,20 +1,20 @@
-import torch
-from torchvision import datasets, transforms
-from torch.utils.data import Dataset, TensorDataset, Subset, random_split
-
+"""Data module of project."""
 import os
-import io
 import tarfile
 from collections.abc import Callable
-from PIL import Image
-
-import typer
-import requests
-from tqdm import tqdm
 from pathlib import Path
 
+import requests
+import torch
+import typer
+from PIL import Image
+from torch.utils.data import Dataset, Subset, TensorDataset, random_split
+from torchvision import transforms
+from tqdm import tqdm
+
+
 class Caltech256(Dataset):
-    """My custom dataset."""
+    """Custom Dataset class for the Caltech256 dataset."""
 
     def __init__(
         self,
@@ -23,6 +23,7 @@ class Caltech256(Dataset):
         target_transform: Callable | None = None,
         download: bool = False,
     ) -> None:
+        """Initialize dataset."""
         self.root = Path(root)
         self.tar_path = self.root / "256_ObjectCategories.tar"
         self.transform = transform
@@ -57,17 +58,18 @@ class Caltech256(Dataset):
         total_size = int(response.headers.get("content-length", 0))
         chunk_size = 4096
 
-        with tqdm(desc="Downloading '256_ObjectCategories.tar'", total=total_size, unit="B", unit_scale=True) as progress_bar:
+        with tqdm(desc="Downloading '256_ObjectCategories.tar'", total=total_size, unit="B", unit_scale=True) as progress:
             with open(self.tar_path, "wb") as tar_file:
                 for data in response.iter_content(chunk_size):
                     tar_file.write(data)
-                    progress_bar.update(len(data))
+                    progress.update(len(data))
 
     def __len__(self) -> int:
+        """Length of dataset."""
         return len(self.imgs)
 
     def __getitem__(self, index: int):
-
+        """Get item from dataset."""
         image = Image.open(self.tar.extractfile(self.imgs[index]))
         target = self.targets[index]
 
@@ -111,11 +113,14 @@ def preprocess_subset(
     train_size = len(subset) - test_size
     train_subset, test_subset = random_split(subset, [train_size, test_size])
 
-    train_images = torch.stack([train_subset[i][0] for i in range(len(train_subset))])
-    train_labels = torch.tensor([train_subset[i][1] for i in range(len(train_subset))])
-
-    test_images = torch.stack([test_subset[i][0] for i in range(len(test_subset))])
-    test_labels = torch.tensor([test_subset[i][1] for i in range(len(test_subset))])
+    print("Constructing training set...")
+    train_subset = tuple(zip(*train_subset, strict=True))
+    train_images = torch.stack(train_subset[0])
+    train_labels = torch.tensor(train_subset[1])
+    print("Constructing test set...")
+    test_subset = tuple(zip(*test_subset, strict=True))
+    test_images = torch.stack(test_subset[0])
+    test_labels = torch.tensor(test_subset[1])
 
     os.makedirs("./data/processed", exist_ok=True)
 
@@ -132,6 +137,7 @@ def main(
         num_classes: int = None,
         download: bool = True
     ):
+    """Preprocess dataset."""
     preprocess_subset(root = "data/raw", num_classes=num_classes, download=download)
 
 if __name__ == '__main__':
