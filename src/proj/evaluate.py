@@ -1,6 +1,6 @@
 import torch
 from tqdm import tqdm
-from model import create_model
+from proj.model import create_model
 
 
 def evaluate(model_checkpoint: str):
