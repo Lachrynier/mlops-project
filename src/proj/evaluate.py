@@ -10,10 +10,10 @@ def evaluate(model_checkpoint: str):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = create_model(num_classes=20).to(device)
+    model = create_model(num_classes=10).to(device)
     model.load_state_dict(torch.load(model_checkpoint, weights_only=True))
 
-    test_dataset = torch.load("data/processed/subset_test.pt")
+    test_dataset = torch.load("data/processed/subset10_test.pt")
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
     model.eval()
