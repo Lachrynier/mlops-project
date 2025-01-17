@@ -2,24 +2,10 @@ outs:
 - hash: md5
   path: data
   files:
-  - relpath: processed/.gitkeep
-    md5: d41d8cd98f00b204e9800998ecf8427e
-    size: 0
+  - relpath: raw/256_ObjectCategories.tar
+    md5: 67b4f42ca05d46448c6bb8ecd2220f6d
+    size: 1183006720
     cloud:
       remote_storage:
-        etag: 08fea4ddf8b0fa8a031001
-        version_id: '1737035351544446'
-  - relpath: processed/subset10_test.pt
-    md5: 7846cbc5903a52b45a5f57a2d39d41fd
-    size: 149928959
-    cloud:
-      remote_storage:
-        etag: 088382d2f8b0fa8a031001
-        version_id: '1737035351359747'
-  - relpath: processed/subset10_train.pt
-    md5: a3b2d04edd59d42f8d861229da7afb7b
-    size: 599712579
-    cloud:
-      remote_storage:
-        etag: 08d9ccd483b1fa8a031001
-        version_id: '1737035374470745'
+        etag: 08e289bb98dffa8a031001
+        version_id: '1737047766123746'
