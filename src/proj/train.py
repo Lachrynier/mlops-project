@@ -5,10 +5,11 @@ import os
 import hydra
 import torch
 import torch.nn as nn
-import wandb
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
+
+import wandb
 
 
 @hydra.main(config_path="../../configs/hydra", config_name="config", version_base=None)
@@ -28,6 +29,7 @@ def train(cfg: DictConfig):
         job_type="train",
         config_exclude_keys=cfg.wandb
     )
+
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(cfg.seed)
 
@@ -50,7 +52,7 @@ def train(cfg: DictConfig):
         return
 
     try:
-        train_dataset = torch.load(f"data/processed/subset{n_classes}_train.pt", weights_only=False)
+        train_dataset = torch.load(f"data/processed/subset{n_classes:03}_train.pt", weights_only=False)
     except FileNotFoundError as e:
         e.strerror = f'''The dataset .pt file could not be found.\n
         Please run 'process-data --num-classes {n_classes}' from an activated python environment.'''
