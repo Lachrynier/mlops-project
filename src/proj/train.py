@@ -56,6 +56,7 @@ def train(cfg: DictConfig):
     except FileNotFoundError as e:
         e.strerror = f'''The dataset .pt file could not be found.\n
         Please run 'process-data --num-classes {n_classes}' from an activated python environment.'''
+        raise e
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
 
