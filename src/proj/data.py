@@ -12,6 +12,12 @@ from torch.utils.data import Dataset, Subset, TensorDataset, random_split
 from torchvision import transforms
 from tqdm import tqdm
 
+TRANSFORM = transforms.Compose([
+        transforms.Lambda(lambda img: img.convert('RGB')),
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
+    ])
 
 class Caltech256(Dataset):
     """Custom Dataset class for the Caltech256 dataset."""
@@ -94,14 +100,7 @@ def preprocess_subset(
     if num_classes is None:
         num_classes = 257 # all classes
 
-    transform = transforms.Compose([
-        transforms.Lambda(lambda img: img.convert('RGB')),
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
-    ])
-
-    dataset = Caltech256(root=root, transform=transform, download=download)
+    dataset = Caltech256(root=root, transform=TRANSFORM, download=download)
 
     # Only keep the indices for the first num_class classes
     subset = Subset(
