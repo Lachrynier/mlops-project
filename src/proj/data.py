@@ -109,7 +109,9 @@ def preprocess_subset(
         [i for i, target in enumerate(dataset.targets) if target < num_classes]
     )
 
-    train_subset, test_subset = random_split(subset, [1 - test_ratio, test_ratio])
+    test_size = int(len(subset) * test_ratio)
+    train_size = len(subset) - test_size
+    train_subset, test_subset = random_split(subset, [train_size, test_size])
 
     print("Constructing training set...")
     train_subset = tuple(zip(*train_subset, strict=True))
