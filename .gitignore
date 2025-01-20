@@ -1,5 +1,14 @@
-data/raw
-data/processed
+# data dir
+data/
+
+# models dir
+models/
+
+# hydra output
+outputs/
+
+# wandb output
+wandb/
 
 docs/site/
 
