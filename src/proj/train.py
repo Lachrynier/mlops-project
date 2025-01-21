@@ -1,5 +1,8 @@
 import torch
 import torch.nn as nn
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
+
 
 from tqdm import tqdm
 import os
@@ -11,7 +14,7 @@ from proj.model import create_model
 def train(lr: float=1e-3):
 
     batch_size = 32
-    epochs = 5
+    epochs = 1
 
     run = wandb.init(
         project="MLOps_project",
@@ -22,7 +25,12 @@ def train(lr: float=1e-3):
 
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
-    train_dataset = torch.load("data/processed/subset10_train.pt", weights_only=False)
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
+    ])
+
+    train_dataset = ImageFolder("./data/processed/train", transform=transform)
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     model = create_model(num_classes=10).to(device)

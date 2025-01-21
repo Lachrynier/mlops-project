@@ -3,15 +3,15 @@ import os
 import tarfile
 from collections.abc import Callable
 from pathlib import Path
-
 import requests
-import torch
 import typer
+from tqdm import tqdm
+
+import torch
 from PIL import Image
 from torch.utils.data import Dataset, Subset, TensorDataset, random_split
 from torchvision import transforms
-from tqdm import tqdm
-
+import lmdb
 
 class Caltech256(Dataset):
     """Custom Dataset class for the Caltech256 dataset."""
@@ -81,6 +81,14 @@ class Caltech256(Dataset):
 
         return image, target
 
+def dataset_to_tensors(dataset: torch.utils.data.Dataset):
+
+    images = torch.stack([image for image, _ in dataset])
+    labels = torch.stack([label for _, label in dataset])
+
+    return images, labels
+
+
 def preprocess_subset(
         root: str,
         num_classes: int | None = None,
@@ -97,39 +105,29 @@ def preprocess_subset(
     transform = transforms.Compose([
         transforms.Lambda(lambda img: img.convert('RGB')),
         transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
     ])
 
     dataset = Caltech256(root=root, transform=transform, download=download)
-
-    # Only keep the indices for the first num_class classes
+     # Only keep the indices for the first num_class classes
     subset = Subset(
         dataset,
         [i for i, target in enumerate(dataset.targets) if target < num_classes]
     )
-
     train_subset, test_subset = random_split(subset, [1 - test_ratio, test_ratio])
 
-    print("Constructing training set...")
-    train_subset = tuple(zip(*train_subset, strict=True))
-    train_images = torch.stack(train_subset[0])
-    train_labels = torch.tensor(train_subset[1])
-    print("Constructing test set...")
-    test_subset = tuple(zip(*test_subset, strict=True))
-    test_images = torch.stack(test_subset[0])
-    test_labels = torch.tensor(test_subset[1])
+    train_names = num_classes * [0]
+    for image, target in train_subset:
+        os.makedirs(f"data/processed/train/{target}", exist_ok=True)
+        image.save(f"data/processed/train/{target}/{train_names[target]}.png")
+        train_names[target] += 1
+    
+    
+    test_names = num_classes * [0]
+    for image, target in test_subset:
+        os.makedirs(f"data/processed/test/{target}", exist_ok=True)
+        image.save(f"data/processed/test/{target}/{test_names[target]}.png")
+        test_names[target] += 1
 
-    os.makedirs("./data/processed", exist_ok=True)
-
-    torch.save(
-        TensorDataset(train_images, train_labels),
-        f'./data/processed/subset{num_classes}_train.pt'
-    )
-    torch.save(
-        TensorDataset(test_images, test_labels),
-        f'./data/processed/subset{num_classes}_test.pt'
-    )
 
 def main(
         num_classes: int = None,
