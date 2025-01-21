@@ -7,7 +7,7 @@ steps:
     '-t',
     'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/train',
     '-f',
-    './dockerfiles/dummy.dockerfile'
+    './dockerfiles/train.dockerfile'
   ]
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Push container image'
