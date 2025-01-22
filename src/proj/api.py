@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from io import BytesIO
@@ -7,34 +9,37 @@ import torch
 from proj.model import create_model
 from proj.data import TRANSFORM
 
-from google.cloud import storage
-import os
-
-storage_client = storage.Client()
-bucket_name = os.environ["BUCKET_NAME"]
-print(f"type(bucket_name): {type(bucket_name)}")
-print(f"bucket_name: {bucket_name}")
-
-bucket = storage_client.bucket(bucket_name)
-blob = bucket.blob("models/model.pth")
-
-model_path = "model.pth"
-blob.download_to_filename(model_path)
-
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-# If the whole model is saved:
-# model = torch.load(model_path)
-
-# If state_dict is saved:
-# Ideally this is not hardcoded but read from a config, or whole model is saved.
-model = create_model(num_classes=10).to(DEVICE)
-model.load_state_dict(torch.load(model_path))
-model.eval()
+MODEL_PATHS = ["/gcs/models/model.pth", "models/model.pth"]
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global model
+
+    state_dict = None
+
+    for path in MODEL_PATHS:
+        try:
+            state_dict = torch.load(path, weights_only=True)
+            break
+        except FileNotFoundError:
+            continue
+
+    if state_dict is None:
+        raise RuntimeError(f"No model found. Searched {MODEL_PATHS}.")
+
+    model = create_model(num_classes=10).to(DEVICE)
+    model.load_state_dict(state_dict)
+    model.eval()
+
+    yield
+
+    del model
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.post("/predict/")
@@ -52,8 +57,11 @@ async def predict(image: UploadFile = File(...)):
             output = model(input_tensor)
 
         predicted_class = output.argmax(dim=1)
+        probabilities = output.softmax(dim=1)
 
-        return JSONResponse(content={"predicted_class": predicted_class.item()})
+        return JSONResponse(
+            content={"predicted_class": predicted_class.item(), "probabilities": probabilities.tolist()}
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
