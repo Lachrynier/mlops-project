@@ -31,5 +31,6 @@ def evaluate(model_checkpoint: str):
     test_accuracy = correct / total
     print(f"Test accuracy: {test_accuracy}")
 
+
 if __name__ == "__main__":
     evaluate("models/model.pth")

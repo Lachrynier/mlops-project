@@ -1,4 +1,5 @@
 """Data module of project."""
+
 import os
 import tarfile
 from collections.abc import Callable
@@ -12,12 +13,15 @@ from torch.utils.data import Dataset, Subset, TensorDataset, random_split
 from torchvision import transforms
 from tqdm import tqdm
 
-TRANSFORM = transforms.Compose([
-        transforms.Lambda(lambda img: img.convert('RGB')),
+TRANSFORM = transforms.Compose(
+    [
+        transforms.Lambda(lambda img: img.convert("RGB")),
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Lambda(lambda x: 2*(x-0.5)) # Renormalize to [-1,1]
-    ])
+        transforms.Lambda(lambda x: 2 * (x - 0.5)),  # Renormalize to [-1,1]
+    ]
+)
+
 
 class Caltech256(Dataset):
     """Custom Dataset class for the Caltech256 dataset."""
@@ -55,7 +59,7 @@ class Caltech256(Dataset):
 
     def _download(self) -> None:
         if self.tar_path.exists():
-           return
+            return
 
         self.root.mkdir(parents=True, exist_ok=True)
 
@@ -64,7 +68,9 @@ class Caltech256(Dataset):
         total_size = int(response.headers.get("content-length", 0))
         chunk_size = 4096
 
-        with tqdm(desc="Downloading '256_ObjectCategories.tar'", total=total_size, unit="B", unit_scale=True) as progress:
+        with tqdm(
+            desc="Downloading '256_ObjectCategories.tar'", total=total_size, unit="B", unit_scale=True
+        ) as progress:
             with open(self.tar_path, "wb") as tar_file:
                 for data in response.iter_content(chunk_size):
                     tar_file.write(data)
@@ -87,26 +93,24 @@ class Caltech256(Dataset):
 
         return image, target
 
+
 def preprocess_subset(
-        root: str,
-        num_classes: int | None = None,
-        test_ratio = 0.2,
-        download: bool = False,
-    ):
+    root: str,
+    num_classes: int | None = None,
+    test_ratio: float = 0.2,
+    download: bool = False,
+):
     """
     num_classes: The first number of classes to be used in the subset.
                  Setting it to None chooses all classes.
     """
     if num_classes is None:
-        num_classes = 257 # all classes
+        num_classes = 257  # all classes
 
     dataset = Caltech256(root=root, transform=TRANSFORM, download=download)
 
     # Only keep the indices for the first num_class classes
-    subset = Subset(
-        dataset,
-        [i for i, target in enumerate(dataset.targets) if target < num_classes]
-    )
+    subset = Subset(dataset, [i for i, target in enumerate(dataset.targets) if target < num_classes])
 
     train_subset, test_subset = random_split(subset, [1 - test_ratio, test_ratio])
 
@@ -121,21 +125,14 @@ def preprocess_subset(
 
     os.makedirs("./data/processed", exist_ok=True)
 
-    torch.save(
-        TensorDataset(train_images, train_labels),
-        f'./data/processed/subset{num_classes}_train.pt'
-    )
-    torch.save(
-        TensorDataset(test_images, test_labels),
-        f'./data/processed/subset{num_classes}_test.pt'
-    )
+    torch.save(TensorDataset(train_images, train_labels), f"./data/processed/subset{num_classes}_train.pt")
+    torch.save(TensorDataset(test_images, test_labels), f"./data/processed/subset{num_classes}_test.pt")
 
-def main(
-        num_classes: int = None,
-        download: bool = True
-    ):
+
+def main(num_classes: int = None, download: bool = True):
     """Preprocess dataset."""
-    preprocess_subset(root = "data/raw", num_classes=num_classes, download=download)
+    preprocess_subset(root="data/raw", num_classes=num_classes, download=download)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     typer.run(main)
