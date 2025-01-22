@@ -19,10 +19,6 @@ readme = "README.md"
 requires-python = ">=3.11"
 dynamic = ["dependencies", "optional-dependencies"]
 
-[project.scripts]
-train = "proj.train:train"
-evaluate = "proj.evaluate:evaluate"
-process-data = "proj.data:main"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
