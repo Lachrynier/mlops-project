@@ -18,7 +18,6 @@ jobs:
       matrix:
         operating-system: ["ubuntu-latest", "windows-latest"]
         python-version: ["3.11"]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,8 +45,9 @@ jobs:
           pip install -e .
           pip list
 
-
       - name: Run tests & coverage
+        env:
+          BUCKET_NAME: ${{ vars.BUCKET_NAME }}
         run: |
           coverage run -m pytest tests/
           coverage report -m -i
