@@ -11,4 +11,4 @@ COPY src src/
 RUN pip install -r requirements_frontend.txt --no-cache-dir --verbose
 RUN pip install . --no-deps --no-cache-dir --verbose
 
-ENTRYPOINT ["streamlit", "src/proj/frontend.py", "--server.port", "$PORT" "--workers", "1"]
+ENTRYPOINT ["sh", "-c", "streamlit run src/proj/frontend.py --server.address 0.0.0.0 --server.port $PORT"]

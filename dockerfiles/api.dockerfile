@@ -11,4 +11,4 @@ COPY src src/
 RUN pip install -r requirements_api.txt --no-cache-dir --verbose
 RUN pip install . --no-deps --no-cache-dir --verbose
 
-ENTRYPOINT ["sh", "-c", "uvicorn src.proj.api:app --port $PORT --workers 1"]
+ENTRYPOINT ["sh", "-c", "uvicorn src.proj.api:app --host 0.0.0.0 --port $PORT --workers 1"]

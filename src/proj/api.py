@@ -54,14 +54,12 @@ async def predict(image: UploadFile = File(...)):
         input_tensor = TRANSFORM(img).unsqueeze(0).to(DEVICE)
 
         with torch.no_grad():
-            output = model(input_tensor)
+            output = model(input_tensor).squeeze(dim=0)
 
-        predicted_class = output.argmax(dim=1)
-        probabilities = output.softmax(dim=1)
+        prediction = output.argmax(dim=0)
+        probabilities = output.softmax(dim=0)
 
-        return JSONResponse(
-            content={"predicted_class": predicted_class.item(), "probabilities": probabilities.tolist()}
-        )
+        return JSONResponse(content={"prediction": prediction.item(), "probabilities": probabilities.tolist()})
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
