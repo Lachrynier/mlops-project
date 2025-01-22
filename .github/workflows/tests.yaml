@@ -9,6 +9,8 @@ on:
     branches:
       - main
       - actions-develop
+    branches-ignore:
+      - docs/checklist
 
 jobs:
   test:
