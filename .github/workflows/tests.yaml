@@ -10,6 +10,9 @@ on:
       - main
       - actions-develop
 
+env:
+  BUCKET_NAME: ${{ env.BUCKET_NAME }}
+
 jobs:
   test:
     environment: gcp
