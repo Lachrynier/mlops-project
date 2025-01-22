@@ -34,8 +34,6 @@ steps:
     './dockerfiles/frontend.dockerfile'
   ]
 
-
-
 # Push train, api and frontend images
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Push train image'
@@ -57,8 +55,6 @@ steps:
     'push',
     'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/frontend'
   ]
-
-
 
 options:
   logging: CLOUD_LOGGING_ONLY
