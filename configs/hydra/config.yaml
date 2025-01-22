@@ -3,5 +3,6 @@ defaults:
   - train
   - model
   - wandb
+  - eval
 
 seed: 42
