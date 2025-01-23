@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
@@ -11,32 +12,40 @@ from proj.data import TRANSFORM
 
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-MODEL_PATHS = ["/gcs/models/model.pth", "models/model.pth"]
+NUM_CLASSES = 10
+ROOTS = [Path("/gcs"), Path("")]
+MODEL_PATH = "models/model.pth"
+CLASS_NAMES_PATH = "models/class_names.txt"
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model
+    global class_names
 
-    state_dict = None
-
-    for path in MODEL_PATHS:
+    for root in ROOTS:
         try:
-            state_dict = torch.load(path, weights_only=True)
-            break
+            state_dict = torch.load(root / MODEL_PATH, weights_only=True)
+
+            model = create_model(num_classes=10).to(DEVICE)
+            model.load_state_dict(state_dict)
+            model.eval()
+
+            with open(root / CLASS_NAMES_PATH) as class_names_file:
+                class_names = class_names_file.readlines()
+                class_names = class_names[:NUM_CLASSES]
+                class_names = [name.strip() for name in class_names]
+
         except FileNotFoundError:
             continue
 
-    if state_dict is None:
-        raise RuntimeError(f"No model found. Searched {MODEL_PATHS}.")
-
-    model = create_model(num_classes=10).to(DEVICE)
-    model.load_state_dict(state_dict)
-    model.eval()
+    if model is None or class_names is None:
+        raise RuntimeError(f"No model found. Searched {[root / MODEL_PATH for root in ROOTS]}.")
 
     yield
 
     del model
+    del class_names
 
 
 app = FastAPI(lifespan=lifespan)
@@ -63,6 +72,11 @@ async def predict(image: UploadFile = File(...)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.get("/class_names/")
+async def get_class_names():
+    return JSONResponse(content={"class_names": class_names})
 
 
 # Local debugging

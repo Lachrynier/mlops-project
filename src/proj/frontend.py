@@ -5,45 +5,65 @@ from PIL import Image
 import requests
 import streamlit as st
 
-
 from google.cloud import run_v2
 
 
 @st.cache_resource
 def get_backend_url() -> str | None:
     """Get the URL of the backend service."""
+
+    # try environment
+    if (backend := os.environ.get("BACKEND", None)) is not None:
+        print(f"Obtained backend from environment variable: {backend}")
+        return backend
+
+    # try GCP
     parent = "projects/mlops-project-77/locations/europe-west1"
     client = run_v2.ServicesClient()
     services = client.list_services(parent=parent)
 
     for service in services:
-        if service.name.split("/")[-1] == "api":
+        if service.name.split("/")[-1] == "backend":
             return service.uri
 
-    return os.environ.get("BACKEND", None)
+    return None
 
 
-def classify_image(image, backend):
+def classify_image(image, backend: str) -> tuple[int, list[float]] | None:
     """Send the image to the backend for classification."""
     predict_url = f"{backend}/predict/"
     response = requests.post(predict_url, files={"image": image})
     if response.status_code != 200:
         return None
 
-    return response.json()
+    response_dict = response.json()
+
+    prediction = response_dict["prediction"]
+    probabilities = response_dict["probabilities"]
+
+    return prediction, probabilities
+
+
+def get_class_names(backend: str) -> list[str] | None:
+    class_names_url = f"{backend}/class_names/"
+    response = requests.get(class_names_url)
+
+    if response.status_code != 200:
+        return None
+
+    response_dict = response.json()
+
+    return response_dict["class_names"]
 
 
 def main() -> None:
-    """Main function of the Streamlit frontend."""
-    # backend = get_backend_url()
+    backend = get_backend_url()
 
-    # if backend is None:
-    #     msg = "Backend service not found"
-    #     raise ValueError(msg)
+    if backend is None:
+        msg = "Backend service not found"
+        raise ValueError(msg)
 
-    backend = "https://backend-658849725274.europe-west1.run.app"
-
-    st.title("Image Classification")
+    st.title("Caltech 256 Image Classification")
 
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
@@ -56,18 +76,24 @@ def main() -> None:
         st.write("Failed to get prediction")
         return
 
-    prediction = result["prediction"]
-    probabilities = result["probabilities"]
+    prediction, probabilities = result
 
     # show the image and prediction
     st.image(Image.open(uploaded_file), caption="Uploaded Image")
     st.write("Prediction:", prediction)
 
-    # make a nice bar chart
-    data = {"Class": [f"Class {i}" for i in range(10)], "Probability": probabilities}
-    df = pd.DataFrame(data)
+    # get class names to create bar chart
+    class_names = get_class_names(backend=backend)
+    if class_names is None:
+        st.write("Failed to get class names")
+        return
+
+    # make a bar chart with top 10 classes
+    data = {"Class": class_names, "Probability": probabilities}
+    df = pd.DataFrame.from_dict(data)
     df.set_index("Class", inplace=True)
-    st.bar_chart(df, y="Probability")
+    top = df.nlargest(10, columns="Probability")
+    st.bar_chart(top, y="Probability")
 
 
 if __name__ == "__main__":
