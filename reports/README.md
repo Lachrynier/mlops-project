@@ -273,7 +273,7 @@ also automated using GitHub actions such that they would be run every time chang
 >
 > Answer:
 
---- question 10 fill here ---
+As our data consists of many files nested in folders, DVC proved to be extremely ineffective. We thus collected all the raw data into a tar file and set up DVC remote on a GCP data bucket. We did not further use DVC. If the dataset of a project changes over time, then it would be useful for reproducibility as we could trace back the version of the dataset that was used to train a specific model. Then we could along with git (and perhaps also a random seed) recreate the exact conditions that were used. DVC also supports working with multiple datasets simultaneously. For example, when new data is introduced, DVC can provide a layer of flexibility to manage different dataset versions, facilitating experimentation and collaboration without overwriting or losing previous data.
 
 ### Question 11
 
@@ -290,7 +290,7 @@ also automated using GitHub actions such that they would be run every time chang
 >
 > Answer:
 
---- question 11 fill here ---
+We have a unit testing workflow that tests for multiple operating systems (Windows and Ubuntu) and one could also add another Python version. The workflow can be seen [here](https://github.com/Lachrynier/mlops-project/blob/main/.github/workflows/tests.yaml). We make use of caching with ```cache: 'pip'```. We have an environment set up called ```gcp``` that allows us to authenticate with GCP in the workflow using secrets: ```${{ secrets.GCP_CREDENTIALS }}```. The environment also allows for setting up environment variables. The workflow sets up Google Cloud SDK, sets up Python, installs dependencies from our requirements files and packages our module as editable just like we would do locally. It then runs tests on all test files in our test folder and calculates the code coverage to assess how much of the codebase is being tested. This helps us identify any untested areas and maintain a high level of test coverage over time. The workflow triggers whenever we push to the main branch or make a pull request to the main branch. This ensures that every proposed change is thoroughly tested before being merged into the primary codebase. By automating this process, we eliminate the need for manual testing, which would otherwise be time-consuming and prone to human error.
 
 ## Running code and tracking experiments
 
@@ -309,7 +309,7 @@ also automated using GitHub actions such that they would be run every time chang
 >
 > Answer:
 
---- question 12 fill here ---
+We configured experiments using Hydra for managing configuration files and Typer for command line interaction in some places. To run an experiment, we first need to preprocess data which can be done with ```python data.py --num-classes {number of classes}```. Then one needs to set this in ```configs/hydra/model.yaml``` along with specifying other configurations under ```configs/hydra```, after which one can run ```python train.py``` to begin training.
 
 ### Question 13
 
@@ -324,7 +324,7 @@ also automated using GitHub actions such that they would be run every time chang
 >
 > Answer:
 
---- question 13 fill here ---
+We made use of Hydra config files. When an experiment is run, we log to wandb and TODO: pass hydra config to wandb metadata? Model weights are saved as artifacts under the wandb run. ...
 
 ### Question 14
 
@@ -356,7 +356,7 @@ also automated using GitHub actions such that they would be run every time chang
 >
 > Answer:
 
---- question 15 fill here ---
+For our project we made docker files for constructing images for training, inference (backend API), and the frontend application. To run ... Here is a link to ...
 
 ### Question 16
 
@@ -371,7 +371,7 @@ also automated using GitHub actions such that they would be run every time chang
 >
 > Answer:
 
---- question 16 fill here ---
+We used VS Code's Python Debugger extension and logging/printing. Logging allows us to track the progress of the program. The debugger allows to add breakpoints, step through code, inspect variables, and interact with the program through a debugging terminal. The breakpoints can be configured to only trigger when certain conditions are true, which can be quite useful. Ideally all debugging is done locally as it can be extremely time consuming and tedious to wait for docker files to build or GCP apps to deploy. Profiling ?...
 
 ## Working in the cloud
 
