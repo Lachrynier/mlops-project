@@ -462,7 +462,7 @@ Something ... Vertex AI ... Something
 >
 > Answer:
 
---- question 23 fill here ---
+We made a backend FastAPI API for inference using our trained model stored on GCP bucket or locally. An image in the format of .jpg, .jpeg or .png can be POSTed to the endpoint /predict, and the API will behind the scenes perform a data transform and call the model, returning a json with the predicted class and class probabilities. We also have an endpoint for GETting the class names. We also have a lifespan context manager ensures a clean shutdown process. We also have error handling that takes care of illegal user input and internal errors. We also have a frontend explained in another question.
 
 ### Question 24
 
