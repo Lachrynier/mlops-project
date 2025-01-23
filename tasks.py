@@ -1,4 +1,5 @@
 import os
+import glob
 
 from invoke import Context, task
 
@@ -17,6 +18,14 @@ def create_environment(ctx: Context) -> None:
         pty=not WINDOWS,
     )
 
+@task
+def all_requirements(ctx: Context) -> None:
+    """Install project requirements."""
+    ctx.run("pip install -U pip setuptools wheel", echo=True, pty=not WINDOWS)
+    requirements_files = glob.glob("requirements_*.txt")
+    for requirements_file in requirements_files:
+        ctx.run(f"pip install -r {requirements_file}", echo=True, pty=not WINDOWS)
+    ctx.run("pip install -e .", echo=True, pty=not WINDOWS)
 
 @task
 def requirements(ctx: Context) -> None:
