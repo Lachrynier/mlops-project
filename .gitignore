@@ -1,6 +1,6 @@
 # data dir
 data/
-!data/raw_test/
+!data/raw_test/256_ObjectCategories.tar
 
 # models dir
 models/
