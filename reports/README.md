@@ -165,13 +165,7 @@ model architecture, which is a 50 layer deep convolutional neural network for im
 >
 > Answer:
 
-All packages for the project are managed using virtual environments. The project includes a requirements.txt file
-which specifies all the required python packages as well as the versions of the packages that are needed for this
-project. In order for a new team member to obtain a copy of the development environment, they would firstly have to 
-clone the repository from Github using ```git clone https://github.com/Lachrynier/mlops-project.git```. They should
-then navigate to the correct directory and create a virtual environment using ```conda create --name <my_environment>```.
-They should then do ```pip install invoke``` followed by ```invoke requirements``` in order to install all the
-required packages.
+All packages for the project are managed using virtual environments, where we use conda for environment management. The project includes multiple requirements files that specify the required package dependencies needed to run our code. A new team member should make sure to have conda or miniconda installed and have ```conda``` accessible as a terminal command (e.g. in the PATH variable or on Windows through the dedicated Anacononda Prompt). Then they should clone the GitHub repository with ```git clone https://github.com/Lachrynier/mlops-project.git```. Afterwards navigate to the root of the repository and execute ```invoke create-environment``` to create the conda environment for the project, followed by executing ```invoke all-requirements``` which combines all requirements files and packages our project in editable mode (or run a subset of the requirements depending on what the team member would be working on).
 
 ### Question 5
 
