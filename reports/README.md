@@ -145,7 +145,7 @@ s214727, s214743, s214706, s214681
 > Answer:
 
 For this project, we decided to utilize the third-party framework PyTorch Image Models (TIMM). We used TIMM's "resnet50.a1_in1k"
-model architecture, which is a 50 layer deep convolutional neural network for image classification that makes use of residual connections.
+model architecture, which is a 50 layer deep convolutional neural network for image classification that makes use of residual connections. The TIMM API is easy to set up and configure, with flexibility for choosing the number of class numbers, convenient for our classification task. This allowed us to quickly integrate a working state-of-the-art model instead of having to design, refine, and test architectures ourselves from scratch, such that we could focus our efforts on topics more directly related to the learning objectives of this course. There is also an option in TIMM to load pretrained weights, which made it possible to fine-tune an existing model potentially saving a lot of compute.
 
 ## Coding environment
 
