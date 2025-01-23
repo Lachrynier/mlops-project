@@ -324,7 +324,7 @@ We configured experiments using Hydra for managing configuration files and Typer
 >
 > Answer:
 
-We made use of Hydra config files. When an experiment is run, we log to wandb and TODO: pass hydra config to wandb metadata? Model weights are saved as artifacts under the wandb run. ...
+We made use of Hydra config files. When an experiment is run, we log to wandb and pass all hydra config values to the wandb run config. Model weights are saved as artifacts under the wandb run. ...
 
 ### Question 14
 
