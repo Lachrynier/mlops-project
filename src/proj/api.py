@@ -30,7 +30,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # If state_dict is saved:
 # Ideally this is not hardcoded but read from a config, or whole model is saved.
 model = create_model(num_classes=10).to(DEVICE)
-model.load_state_dict(torch.load(model_path))
+model.load_state_dict(torch.load(model_path, weights_only=True))
 model.eval()
 
 

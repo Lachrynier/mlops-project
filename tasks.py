@@ -53,6 +53,30 @@ def test(ctx: Context) -> None:
 
 
 @task
+def generate_test_dataset(ctx: Context, classes: int = 5, images_per_class: int = 2) -> None:
+    """Generate a reduced dataset for unit tests"""
+    import proj.data
+    import tarfile
+
+    os.makedirs("data/raw_test", exist_ok=True)
+    tar = tarfile.open("data/raw_test/256_ObjectCategories.tar", "w|")
+    dataset = proj.data.Caltech256("data/raw", download=True)
+
+    selected_counts = classes * [0]
+
+    for img, target in zip(dataset.imgs, dataset.targets):
+        if target >= classes:
+            continue
+
+        if selected_counts[target] >= images_per_class:
+            continue
+
+        member = dataset.tar.getmember(img)
+        tar.addfile(member, dataset.tar.extractfile(member))
+        selected_counts[target] += 1
+
+
+@task
 def docker_build(ctx: Context, progress: str = "plain") -> None:
     """Build docker images."""
     ctx.run(

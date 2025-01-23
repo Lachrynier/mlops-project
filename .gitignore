@@ -1,5 +1,6 @@
 # data dir
 data/
+!data/raw_test/
 
 # models dir
 models/

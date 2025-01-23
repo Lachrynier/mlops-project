@@ -1,6 +1,5 @@
 """Data module of project."""
 
-import os
 import tarfile
 from collections.abc import Callable
 from pathlib import Path
@@ -57,6 +56,8 @@ class Caltech256(Dataset):
             self.imgs.append(member.name)
             self.targets.append(int(member.name.split("/")[2][0:3]) - 1)
 
+        self.num_classes = len(set(self.targets))
+
     def _download(self) -> None:
         if self.tar_path.exists():
             return
@@ -95,7 +96,8 @@ class Caltech256(Dataset):
 
 
 def preprocess_subset(
-    root: str,
+    raw_dir: Path | str,
+    processed_dir: Path | str,
     num_classes: int | None = None,
     test_ratio: float = 0.2,
     download: bool = False,
@@ -104,10 +106,11 @@ def preprocess_subset(
     num_classes: The first number of classes to be used in the subset.
                  Setting it to None chooses all classes.
     """
-    if num_classes is None:
-        num_classes = 257  # all classes
 
-    dataset = Caltech256(root=root, transform=TRANSFORM, download=download)
+    dataset = Caltech256(root=raw_dir, transform=TRANSFORM, download=download)
+
+    if num_classes is None:
+        num_classes = dataset.num_classes  # all classes
 
     # Only keep the indices for the first num_class classes
     subset = Subset(dataset, [i for i, target in enumerate(dataset.targets) if target < num_classes])
@@ -123,15 +126,16 @@ def preprocess_subset(
     test_images = torch.stack(test_subset[0])
     test_labels = torch.tensor(test_subset[1])
 
-    os.makedirs("./data/processed", exist_ok=True)
+    processed_dir = Path(processed_dir)
+    processed_dir.mkdir(parents=True, exist_ok=True)
 
-    torch.save(TensorDataset(train_images, train_labels), f"./data/processed/subset{num_classes}_train.pt")
-    torch.save(TensorDataset(test_images, test_labels), f"./data/processed/subset{num_classes}_test.pt")
+    torch.save(TensorDataset(train_images, train_labels), processed_dir / f"subset{num_classes}_train.pt")
+    torch.save(TensorDataset(test_images, test_labels), processed_dir / f"subset{num_classes}_test.pt")
 
 
 def main(num_classes: int = None, download: bool = True):
     """Preprocess dataset."""
-    preprocess_subset(root="data/raw", num_classes=num_classes, download=download)
+    preprocess_subset(raw_dir="data/raw", processed_dir="data/processed", num_classes=num_classes, download=download)
 
 
 if __name__ == "__main__":

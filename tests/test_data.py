@@ -7,19 +7,20 @@ from PIL import Image
 from proj.data import Caltech256
 
 
-N_IMAGES = 30607
+N_IMAGES = 10
+N_CLASSES = 5
 
 
 def test_caltech256_load():
     """Test the Caltech256 class."""
-    dataset = Caltech256(root="data/raw", download=True)
+    dataset = Caltech256(root="data/raw_test")
     assert isinstance(dataset, Dataset)
     assert len(dataset) == N_IMAGES
 
     for image, target in dataset:
         assert isinstance(image, Image.Image)
         assert isinstance(target, int)
-        assert target >= 0 and target <= 256  # not a mistake, there are 257 categories (includes "clutter")
+        assert target >= 0 and target < 5
 
 
 def test_caltech256_transform():
@@ -33,7 +34,7 @@ def test_caltech256_transform():
         ]
     )
 
-    dataset = Caltech256(root="data/raw", transform=transform, download=True)
+    dataset = Caltech256(root="data/raw_test", transform=transform)
 
     for image, _ in dataset:
         assert isinstance(image, torch.Tensor)
@@ -43,8 +44,8 @@ def test_caltech256_transform():
 
 
 def test_caltech256_target_transform():
-    dataset = Caltech256(root="data/raw", target_transform=(lambda x: x + 256), download=True)
+    dataset = Caltech256(root="data/raw_test", target_transform=(lambda x: x + 5))
 
     for _, target in dataset:
         assert isinstance(target, int)
-        assert target >= 256 and target <= 512
+        assert target >= 5 and target < 10
