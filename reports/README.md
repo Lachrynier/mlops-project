@@ -388,7 +388,7 @@ We used VS Code's Python Debugger extension and logging/printing. Logging allows
 >
 > Answer:
 
-We used: Cloud Storage, Cloud Run, Artifact Registry, Cloud Build, Vertex AI, IAM & Admin. Cloud Storage is used for mounting to GCP instances, DVC, and saving models. This is done through a bucket. Cloud Run is used to deploy applications. Here we hosted our backend and frontend. Artifact Registry is used to store our docker images such that they can be used by the other applications/services. Cloud Build is used for continuously deployment based on triggers such as pushing to the main branch or creating a new git tag.
+We used: Cloud Storage, Cloud Run, Artifact Registry, Cloud Build, Vertex AI. Cloud Storage is used for mounting to GCP instances, DVC, and saving models. This is done through a bucket. Cloud Run is used to deploy applications. Here we hosted our backend and frontend. Artifact Registry is used to store our docker images such that they can be used by the other applications/services. Cloud Build is used for continuous deployment based on triggers such as pushing to the main branch or creating a new git tag. Vertex AI lets us create train jobs with specified resources and docker image along with configs.
 
 ### Question 18
 
@@ -403,7 +403,7 @@ We used: Cloud Storage, Cloud Run, Artifact Registry, Cloud Build, Vertex AI, IA
 >
 > Answer:
 
---- question 18 fill here ---
+We used Vertex AI instead of the Compute engine. ...
 
 ### Question 19
 
@@ -412,7 +412,7 @@ We used: Cloud Storage, Cloud Run, Artifact Registry, Cloud Build, Vertex AI, IA
 >
 > Answer:
 
---- question 19 fill here ---
+A screenshot of the GCP bucket can be seen here (subject to change?): [link](figures/bucket.png)
 
 ### Question 20
 
@@ -421,7 +421,7 @@ We used: Cloud Storage, Cloud Run, Artifact Registry, Cloud Build, Vertex AI, IA
 >
 > Answer:
 
---- question 20 fill here ---
+A screenshot of the GCP artifact registry can be seen here (subject to change?): [link](figures/registry.png)
 
 ### Question 21
 
@@ -430,7 +430,7 @@ We used: Cloud Storage, Cloud Run, Artifact Registry, Cloud Build, Vertex AI, IA
 >
 > Answer:
 
---- question 21 fill here ---
+A screenshot of the GCP Cloud Build history can be seen here (subject to change?): [link](figures/registry.png)
 
 ### Question 22
 
@@ -445,7 +445,7 @@ We used: Cloud Storage, Cloud Run, Artifact Registry, Cloud Build, Vertex AI, IA
 >
 > Answer:
 
---- question 22 fill here ---
+Something ... Vertex AI ... Something
 
 ## Deployment
 
