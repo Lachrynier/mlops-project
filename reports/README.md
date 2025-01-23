@@ -223,7 +223,7 @@ The code is split over multiple files and folders, organized after functionality
 We implemented a total of 5 tests. These include testing of api functionality e.g. asserting that we get the expected
 status_codes and responses as well as making sure that our application makes valid predictions for a few test images.
 We test our custom dataset class to verify that shapes and types are as expected, and lastly, we also test that for a
-given valid input, out model provides a valid output.
+given valid input, our model provides a valid output.
 
 ### Question 8
 
@@ -238,7 +238,7 @@ given valid input, out model provides a valid output.
 >
 > Answer:
 
---- question 8 fill here ---
+The total code coerage is 77% (subject to change), which includes all source code. Ideally this should be 100%, but even then, that is not a guarantee that code is error-free. Code coverage per definition only checks whether a line of code is executed, not whether the logic is flawless or if all edge cases are handled. But not having 100% means that some of the code is completely untested. With full coverage, there could be subtle logical errors that tests fail to catch, as tests might not account for all possible scenarios. It is important to modularize code as much as possible in this regard to reduce the number of input data combinations that need to be tested, making the tests simpler, and making debugging more isolated. The unit tests also do not guarantee that the interaction of the whole system works as expected.
 
 ### Question 9
 
