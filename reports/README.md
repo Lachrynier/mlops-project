@@ -165,7 +165,7 @@ model architecture, which is a 50 layer deep convolutional neural network for im
 >
 > Answer:
 
-All packages for the project are managed using virtual environments, where we use conda for environment management. The project includes multiple requirements files that specify the required package dependencies needed to run our code. A new team member should make sure to have conda or miniconda installed and have ```conda``` accessible as a terminal command (e.g. in the PATH variable or on Windows through the dedicated Anacononda Prompt). Then they should clone the GitHub repository with ```git clone https://github.com/Lachrynier/mlops-project.git```. Afterwards navigate to the root of the repository and execute ```invoke create-environment``` to create the conda environment for the project, followed by executing ```invoke all-requirements``` which combines all requirements files and packages our project in editable mode (or run a subset of the requirements depending on what the team member would be working on).
+All packages for the project are managed using virtual environments, where we use conda for environment management. The project includes multiple requirements files that specify the required package dependencies needed to run our code. A new team member should make sure to have conda or miniconda installed and have ```conda``` accessible as a terminal command (e.g. in the PATH variable or on Windows through the dedicated Anacononda Prompt). Then they should clone the GitHub repository with ```git clone https://github.com/Lachrynier/mlops-project.git```. Afterwards navigate to the root of the repository and execute ```invoke create-environment``` to create the conda environment for the project and then activate the environment using ```conda activate proj```. Then execute ```invoke all-requirements``` which combines all requirements files and packages our project in editable mode (or run a subset of the requirements depending on what the team member would be working on).
 
 ### Question 5
 
@@ -201,7 +201,7 @@ for the project. In the project root directory we added a number of new files in
 >
 > Answer:
 
---- question 6 fill here ---
+The code is split over multiple files and folders, organized after functionality. The individual files are modularized such that they can be reused and easily tested. Type hinting is included most places and although there could probably be more documentation, most of the code is self-evident. Tools like linters and formatters help keep the codebase clean and easier to navigate. Code quality and formatting is important for consistency and readability. As the project grows, modularizing code and type hinting makes the code more controlled and predictable, which is crucial when collaborating. Documentation helps save time by not having to spend time constantly revisiting and analyzing source code when you forget how something works.
 
 ## Version control
 
