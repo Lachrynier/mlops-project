@@ -478,7 +478,7 @@ We made a backend FastAPI API for inference using our trained model stored on GC
 >
 > Answer:
 
---- question 24 fill here ---
+The API was deployed using GCP Run. We have also set it up flexibly so that the application can be run locally as well. The API was initially built locally for faster development and easier debugging, and then when it worked we began deploying it to GCP. We had to build a docker image either locally or through Cloud Build and push it to our artifact registry for the application to use. To invoke inference with the service, one can `import requests` and call `response = requests.post(predict_url, files={"image": image})` filling out `predict_url` with the corresponding URL where it is hosted and concatenating the endpoint, and `image` with the corresponding image file. The response is a json with prediction and probability entries.
 
 ### Question 25
 
