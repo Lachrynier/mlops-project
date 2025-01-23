@@ -493,7 +493,7 @@ The API was deployed using GCP Run. We have also set it up flexibly so that the 
 >
 > Answer:
 
---- question 25 fill here ---
+We performed unit testing on the API. We downloaded some external (not part of our dataset) images found on google in the different image formats that our API supports. We then check for status codes, that the content type is correct (application/json), that the prediction is a valid class integer, that the probabilities sum up to 1. We could probably add some more tests that sends illegal input to test how such is handled. We did not perform load testing. This could be done by simulating user traffic with corresponding randomized input, e.g. using Locust, and see how our application holds up for different numbers of users and spawn rates. Correspondingly, we could scale our application to use better cloud hardware if needed.
 
 ### Question 26
 
