@@ -258,7 +258,7 @@ feature, they would create a new branch with the name ```feature/<whatever>``` w
 on that feature. Changes to the main branch were then made using pull requests. We attempted to make pull requests often
 enough that we would only encounter a minimal number of merge conflicts. Additionally, We implemented branch protection
 on the main branch such that at least one group member had to approve the request before it could be merged. Tests were
-also automated using Github actions such that they would be run every time changes were merged to the main branch.
+also automated using GitHub actions such that they would be run every time changes were merged to the main branch or pull requests were made. The latter reduced the possibility that merging to main breaks code as we would only merge when the workflow passed flawlessly.
 
 ### Question 10
 
