@@ -37,7 +37,7 @@ def train(cfg: DictConfig):
     # model = create_model(num_classes=10).to(device)
     model = instantiate(cfg.model).to(device)
 
-    model_name = f"{cfg.model.architecture}_c{num_classes}"
+    model_name = cfg.model.name
     artifact = wandb.Artifact(
         name=model_name,
         type="Model",

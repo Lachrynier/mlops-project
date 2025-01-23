@@ -16,7 +16,7 @@ def evaluate(cfg):
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = create_model(num_classes=num_classes).to(device)
-    model_name = f"{cfg.model.architecture}_c{num_classes}"
+    model_name = cfg.model.name
 
     model.load_state_dict(torch.load(f"models/{model_name}.pt", weights_only=True))
 

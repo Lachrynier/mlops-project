@@ -3,3 +3,4 @@ model:
   architecture: resnet50.a1_in1k
   pretrained: False
   num_classes: 10
+  name: ${architecture}_c${num_classes}
