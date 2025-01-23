@@ -34,6 +34,7 @@ def classify_image(image, backend: str) -> tuple[int, list[float]] | None:
     predict_url = f"{backend}/predict/"
     response = requests.post(predict_url, files={"image": image})
     if response.status_code != 200:
+        print(response.content)
         return None
 
     response_dict = response.json()
@@ -70,30 +71,33 @@ def main() -> None:
     if uploaded_file is None:
         return
 
+    # get classification
     result = classify_image(uploaded_file, backend=backend)
-
     if result is None:
         st.write("Failed to get prediction")
         return
-
     prediction, probabilities = result
 
-    # show the image and prediction
-    st.image(Image.open(uploaded_file), caption="Uploaded Image")
-    st.write("Prediction:", prediction)
-
-    # get class names to create bar chart
+    # get class names
     class_names = get_class_names(backend=backend)
     if class_names is None:
         st.write("Failed to get class names")
         return
 
-    # make a bar chart with top 10 classes
-    data = {"Class": class_names, "Probability": probabilities}
-    df = pd.DataFrame.from_dict(data)
-    df.set_index("Class", inplace=True)
-    top = df.nlargest(10, columns="Probability")
-    st.bar_chart(top, y="Probability")
+    col_left, col_right = st.columns(2)
+
+    with col_left:
+        st.image(Image.open(uploaded_file), caption="Uploaded Image")
+
+    with col_right:
+        st.write("Prediction:", class_names[prediction])
+
+        # make a bar chart with top 10 classes
+        data = {"Class": class_names, "Probability": probabilities}
+        df = pd.DataFrame.from_dict(data)
+        df.set_index("Class", inplace=True)
+        top = df.nlargest(10, columns="Probability")
+        st.bar_chart(top, y="Probability", horizontal=True)
 
 
 if __name__ == "__main__":
