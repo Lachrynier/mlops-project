@@ -7,13 +7,17 @@ WINDOWS = os.name == "nt"
 PROJECT_NAME = "proj"
 PYTHON_VERSION = "3.11"
 
+# Fix annoying bug https://github.com/pyinvoke/invoke/issues/833
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
 
 # Setup commands
 @task
 def create_environment(ctx: Context) -> None:
     """Create a new conda environment for project."""
     ctx.run(
-        f"conda create --name {PROJECT_NAME} python={PYTHON_VERSION} pip --no-default-packages --yes",
+        f"conda create --name {PROJECT_NAME} python={PYTHON_VERSION} pip invoke --no-default-packages --yes",
         echo=True,
         pty=not WINDOWS,
     )
