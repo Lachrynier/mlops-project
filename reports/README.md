@@ -388,7 +388,7 @@ We used VS Code's Python Debugger extension and logging/printing. Logging allows
 >
 > Answer:
 
---- question 17 fill here ---
+We used: Cloud Storage, Cloud Run, Artifact Registry, Cloud Build, Vertex AI, IAM & Admin. Cloud Storage is used for mounting to GCP instances, DVC, and saving models. This is done through a bucket. Cloud Run is used to deploy applications. Here we hosted our backend and frontend. Artifact Registry is used to store our docker images such that they can be used by the other applications/services. Cloud Build is used for continuously deployment based on triggers such as pushing to the main branch or creating a new git tag.
 
 ### Question 18
 
