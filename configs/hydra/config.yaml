@@ -1,0 +1,8 @@
+defaults:
+  - _self_
+  - train
+  - model
+  - wandb
+  - eval
+
+seed: 42
