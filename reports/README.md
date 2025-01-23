@@ -144,7 +144,8 @@ s214727, s214743, s214706, s214681
 >
 > Answer:
 
---- question 3 fill here ---
+For this project, we decided to utilize the third-party framework PyTorch Image Models (TIMM). We used TIMM's "resnet50.a1_in1k"
+model architecture, which is a 50 layer deep convolutional neural network for image classification that makes use of residual connections.
 
 ## Coding environment
 
@@ -164,7 +165,13 @@ s214727, s214743, s214706, s214681
 >
 > Answer:
 
---- question 4 fill here ---
+All packages for the project are managed using virtual environments. The project includes a requirements.txt file
+which specifies all the required python packages as well as the versions of the packages that are needed for this
+project. In order for a new team member to obtain a copy of the development environment, they would firstly have to 
+clone the repository from Github using ```git clone https://github.com/Lachrynier/mlops-project.git```. They should
+then navigate to the correct directory and create a virtual environment using ```conda create --name <my_environment>```.
+They should then do ```pip install invoke``` followed by ```invoke requirements``` in order to install all the
+required packages.
 
 ### Question 5
 
@@ -180,7 +187,12 @@ s214727, s214743, s214706, s214681
 >
 > Answer:
 
---- question 5 fill here ---
+We organized the project structure using cookiecutter with [this](https://github.com/SkafteNicki/mlops_template) template.
+Our structure very closely follows the structure of the original template. The data folder includes data/raw and
+data/processed (both of which are excluded from the git repo in .gitignore). The src/proj folder includes the following
+files: api.py, data.py, evaluate.py, model.py and train.py. We did not use a visualize.py file. We used all three files
+from the tests folder in the original template. We did not use the notebooks folder as we did not utilize any notebooks
+for the project. In the project root directory we added a number of new files including cloudbuild.yaml, config_vertex.yaml etc.
 
 ### Question 6
 
@@ -214,7 +226,10 @@ s214727, s214743, s214706, s214681
 >
 > Answer:
 
---- question 7 fill here ---
+We implemented a total of 5 tests. These include testing of api functionality e.g. asserting that we get the expected
+status_codes and responses as well as making sure that our application makes valid predictions for a few test images.
+We test our custom dataset class to verify that shapes and types are as expected, and lastly, we also test that for a
+given valid input, out model provides a valid output.
 
 ### Question 8
 
@@ -244,7 +259,12 @@ s214727, s214743, s214706, s214681
 >
 > Answer:
 
---- question 9 fill here ---
+We used both branches and pull requests for our project. In general, when a group member would start working on a new
+feature, they would create a new branch with the name ```feature/<whatever>``` which would then be dedicated to working
+on that feature. Changes to the main branch were then made using pull requests. We attempted to make pull requests often
+enough that we would only encounter a minimal number of merge conflicts. Additionally, We implemented branch protection
+on the main branch such that at least one group member had to approve the request before it could be merged. Tests were
+also automated using Github actions such that they would be run every time changes were merged to the main branch.
 
 ### Question 10
 
