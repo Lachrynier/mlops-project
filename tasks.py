@@ -22,7 +22,7 @@ def create_environment(ctx: Context) -> None:
 def all_requirements(ctx: Context) -> None:
     """Install project requirements."""
     ctx.run("pip install -U pip setuptools wheel", echo=True, pty=not WINDOWS)
-    requirements_files = glob.glob("requirements_*.txt")
+    requirements_files = glob.glob("requirements*.txt")
     for requirements_file in requirements_files:
         ctx.run(f"pip install -r {requirements_file}", echo=True, pty=not WINDOWS)
     ctx.run("pip install -e .", echo=True, pty=not WINDOWS)
