@@ -18,7 +18,8 @@ import wandb
 def train(cfg: DictConfig):
     """Train a model on MNIST."""
     print(f"### Configuration: \n{OmegaConf.to_yaml(cfg, resolve=True)}")
-    wandb.config = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
+    print(OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True))
+    config = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
 
     num_classes = cfg.model.num_classes
 
@@ -27,6 +28,7 @@ def train(cfg: DictConfig):
         # config={"lr": lr, "batch_size": batch_size, "epochs": epochs},
         entity=cfg.wandb.entity,
         job_type="train",
+        config=config,
     )
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -88,6 +90,7 @@ def train(cfg: DictConfig):
     torch.save(model.state_dict(), f"models/{model_name}.pt")
     artifact.add_file(f"models/{model_name}.pt")
     run.log_artifact(artifact)
+    run.finish()
 
     # plot code:
     # os.makedirs("reports/figures", exist_ok=True)
