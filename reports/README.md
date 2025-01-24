@@ -601,7 +601,9 @@ Admittedly, it is somewhat abuse of Cloud Builds to have a build run for the ent
 >
 > Answer:
 
---- question 29 fill here ---
+![architecture](figures/mlops_architecture.png)
+
+Our workflow starts of local development, during which we may run our code to debug and profile. When training models during this, the code uses the GCP secret manager to obtain an API key to Weights & Biases, so that we can get a nice visual output of our models performance. When we are ready with a new feature, we create a pull request from a separate branch into main on GitHub. This is then followed by GitHub actions ensuring that all unit tests pass before we allow the merge. When a (git tagged) new version occurs on the main branch, a trigger in GCP is set off, activating our deployment pipeline (described in the previous question). 
 
 ### Question 30
 
