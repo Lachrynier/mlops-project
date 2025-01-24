@@ -508,7 +508,7 @@ We performed unit testing on the API. We downloaded some external (not part of o
 >
 > Answer:
 
---- question 26 fill here ---
+We did not manage to implement monitoring. However, it would be crucial for maintaining reliability and performance over time. One thing that can be monitored is data drifting, where you can be alerted when data distributions change such that measures can be taken, e.g. retraining the model. Data distributions can be image sizes, class labels, or it could be more abstract such as NN layer activations or derived features of the images. Model performance can also be tracked such that we can see how well our model performs. GCP resources and billing could also be monitored such that changes to the infrastructure can be done when needed. 
 
 ## Overall discussion of project
 
