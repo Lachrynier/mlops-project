@@ -2,24 +2,30 @@ import torch
 from tqdm import tqdm
 from proj.model import create_model
 
+import hydra
 
-def evaluate(model_checkpoint: str):
+
+@hydra.main(config_path="../../configs/hydra", config_name="config", version_base=None)
+def evaluate(cfg):
     print("Evaluating model")
 
-    batch_size = 32
+    # batch_size = 32
+    batch_size = cfg.eval.batch_size
+    num_classes = cfg.model.num_classes
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = create_model(num_classes=10).to(device)
-    model.load_state_dict(torch.load(model_checkpoint, weights_only=True))
+    model = create_model(num_classes=num_classes).to(device)
 
-    test_dataset = torch.load("data/processed/subset10_test.pt")
+    model.load_state_dict(torch.load(f"models/{cfg.model_name}.pt", weights_only=True))
+
+    test_dataset = torch.load("data/processed/subset10_test.pt", weights_only=False)
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
     model.eval()
     correct = 0
     total = 0
-    for images, labels in tqdm(iter(test_dataloader)):
+    for images, labels in tqdm(test_dataloader):
         images, labels = images.to(device), labels.to(device)
 
         output = model(images)
@@ -31,5 +37,6 @@ def evaluate(model_checkpoint: str):
     test_accuracy = correct / total
     print(f"Test accuracy: {test_accuracy}")
 
+
 if __name__ == "__main__":
-    evaluate("models/model.pth")
+    evaluate()

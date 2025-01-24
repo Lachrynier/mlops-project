@@ -1,45 +1,71 @@
+"""Project training module."""
+
+import os
+
+# from proj.model import create_model
+import hydra
 import torch
 import torch.nn as nn
-
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
-import os
+from pathlib import Path
+
 import wandb
 
-from proj.model import create_model
 
+@hydra.main(config_path="../../configs/hydra", config_name="config", version_base=None)
+def train(cfg: DictConfig):
+    """Train a model on MNIST."""
+    print(f"### Configuration: \n{OmegaConf.to_yaml(cfg, resolve=True)}")
+    config = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
 
-def train(lr: float=1e-3):
-
-    batch_size = 32
-    epochs = 5
+    num_classes = cfg.model.num_classes
 
     run = wandb.init(
-        project="MLOps_project",
-        config={"lr": lr, "batch_size": batch_size, "epochs": epochs},
-        entity="vastian4-danmarks-tekniske-universitet-dtu",
-        job_type="Training"
+        project=cfg.wandb.project,
+        # config={"lr": lr, "batch_size": batch_size, "epochs": epochs},
+        entity=cfg.wandb.entity,
+        job_type="train",
+        config=config,
     )
 
-    device = ('cuda' if torch.cuda.is_available() else 'cpu')
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    torch.manual_seed(cfg.seed)
 
-    train_dataset = torch.load("data/processed/subset10_train.pt", weights_only=False)
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    # model = create_model(num_classes=10).to(device)
+    model = instantiate(cfg.model).to(device)
 
-    model = create_model(num_classes=10).to(device)
+    artifact = wandb.Artifact(
+        name=cfg.model_name,
+        type="Model",
+        description=f"A model trained to classify {cfg.model.num_classes} classes from Caltech256.",
+        metadata={"pretrained": cfg.model.pretrained},
+    )
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    data_dir = Path(cfg.data_dir)
+
+    try:
+        train_dataset = torch.load(data_dir / f"subset{num_classes}_train.pt", weights_only=False)
+    except FileNotFoundError as e:
+        e.strerror = f"""The dataset .pt file could not be found.\n
+        Please run 'python src/proj/data.py --num-classes {num_classes}' from an activated python environment."""
+        raise e
+
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
+
+    optimizer = instantiate(cfg.optimizer, params=model.parameters())
     criterion = nn.CrossEntropyLoss()
 
-    #arrays for plotting train loss and accuracy
+    # arrays for plotting train loss and accuracy
     train_loss = []
     train_accuracy = []
 
     print("Training")
     model.train()
 
-    for epoch in range(epochs):
-        for images, labels in tqdm(iter(train_dataloader)):
-            
+    for epoch in range(cfg.epochs):
+        for images, labels in tqdm(train_dataloader, desc=f"Epoch: {epoch + 1}", disable=not cfg.print_progress):
             images, labels = images.to(device), labels.to(device)
 
             optimizer.zero_grad()
@@ -54,24 +80,20 @@ def train(lr: float=1e-3):
             loss.backward()
             optimizer.step()
 
-            #wandb logging
+            # wandb logging
             wandb.log({"train_loss": loss.item(), "train_accuracy": accuracy})
 
-    #save weights and log with wandb
+    # save weights and log with wandb
     os.makedirs("models", exist_ok=True)
-    torch.save(model.state_dict(), "models/model.pth")
-    artifact = wandb.Artifact(
-        name="Caltech256_model",
-        type="Model",
-        description="A model trained to classify 10 classes from Caltech256."
-    )
-    artifact.add_file("models/model.pth")
+    torch.save(model.state_dict(), f"models/{cfg.model_name}.pt")
+    artifact.add_file(f"models/{cfg.model_name}.pt")
     run.log_artifact(artifact)
+    run.finish()
 
-    #plot code:
+    # plot code:
     # os.makedirs("reports/figures", exist_ok=True)
     # ...
-    
-    
+
+
 if __name__ == "__main__":
     train()
