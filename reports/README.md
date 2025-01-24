@@ -362,6 +362,7 @@ python packages installed and different entrypoints:
 - `train`: Most notable packages are `pytorch`, `timm` and `hydra-code`, all necessary to run training. Its entrypoint first preprocesses the data using `data.py` (storing the result in the container) and then runs training using `train.py`
 - `api`: Most notable packages are `pytorch`, `fastapi` and `uvicorn`. Its entrypoint launches `api.py` which in turn launches a server.
 - `frontend`: Most notable packages are `streamlit` and `requests`. Its entrypoint runs `streamlit run frontend.py`, hosting a frontend server.
+
 The images are separate to optimize size. The `frontend` image, which does not depend on `pytorch`, is only around 13% the size of the others.
 
 ### Question 16
@@ -563,7 +564,18 @@ We ended up using (subject to change) $2.40 in credits. Vertex AI (expensive com
 >
 > Answer:
 
-We implemented a frontend for our API. It was implemented using streamlit. It has a simple but nice interface for uploading an image, and upon uploading, it will show the image alongside the predicted class and a plot of the probabilities.
+We implemented a frontend for our API. It was implemented using streamlit. It has a simple but nice interface for uploading an image, and upon uploading, it will show the image alongside the predicted class and a plot of the probabilities. We set up CD for both backend and frontend using cloud builds. The CD is implemented in the `cloudbuild.yaml` file, which performs 10 steps:
+- 0-2: Build `train`, `api` and `frontend` docker images
+- 3-5: Push `train`, `api` and `frontend` docker images
+- 6: Submit a training job to Vertex AI, storing the job id in a temporary file
+- 7: Read the job id from the file and use the `gcloud ai custom-jobs describe` command to wait for training to finish.
+- 8-9: Deploy `api` and `frontend` images to their respective Cloud Run services
+
+This build is triggered whenever a new version tag is pushed to `main` on GitHub, so no manual intervention is needed for deployment. Alternatively, the current local version of the code can be deployed by
+```bash
+gcloud builds submit . --region=europe-west1 --config=cloudbuilds.yaml
+```
+Admittedly, it is somewhat abuse of Cloud Builds to have a build run for the entire training time, and this could likely be implemented better by having Vertex AI invoke a cloud function that could perform the deployment at the end of training.
 
 ### Question 29
 
