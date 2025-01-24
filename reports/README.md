@@ -324,7 +324,7 @@ We configured experiments using Hydra for managing configuration files and Typer
 >
 > Answer:
 
-We made use of Hydra config files. When an experiment is run, we log to wandb and pass all hydra config values to the wandb run config. Model weights are saved as artifacts under the wandb run. ...
+We made use of Hydra config files. When an experiment is run, we log to wandb and pass all hydra config values to the wandb run config. Model weights are saved as artifacts under the wandb run. All experiments were manually seeded and anything that could be interpreted as a hyperparameter was defined in the hydra configuration files. The seeding may not be completely thorough, as we only used the ```manual_seed``` method from PyTorch, while a more extensive method is available through PyTorch Lightning.
 
 ### Question 14
 
@@ -345,10 +345,10 @@ We chose to use Weights & Biases for illustrating the training loss as well as t
 A graph of the training loss can be seen here: [link](figures/train_loss.png).
 A graph of the training accuracy can be seen here: [link](figures/train_accuracy.png).
 
-The evolution of the training loss shows us how the performance of the model improves with the number of training 
-steps by measuring the error between the predicted values and the target values. The training accuracy graph 
-shows us exactly how accurate the model is during training by showing how the percentage of correctly labeled 
-images increases with the number of training steps. As seen on the second image, training accuracy reaches 
+The evolution of the training loss shows us how the performance of the model improves with the number of training
+steps by measuring the error between the predicted values and the target values. The training accuracy graph
+shows us exactly how accurate the model is during training by showing how the percentage of correctly labeled
+images increases with the number of training steps. As seen on the second image, training accuracy reaches
 approximately 60% after close to 8000 training steps.
 
 
@@ -470,11 +470,11 @@ gcloud ai custom-jobs create \
 --service-account=<service account email> \
 --config=<config file> \
 ```
-Here, we specify a number of practical details of the training job along with which config file to use. In the config 
-file we specify which virtual machine we want to use for running the training job along with which docker image from the 
-artifact repository to load. To access training data for training, we used Cloud Storage as a mounted file system by 
-accessing our data bucket as a subdirectory of the root /gcs directory. Similarly, the weights of the resulting trained 
-model were saved in a different directory in the same bucket. To authenticate the login to Weights and Biases automatically 
+Here, we specify a number of practical details of the training job along with which config file to use. In the config
+file we specify which virtual machine we want to use for running the training job along with which docker image from the
+artifact repository to load. To access training data for training, we used Cloud Storage as a mounted file system by
+accessing our data bucket as a subdirectory of the root /gcs directory. Similarly, the weights of the resulting trained
+model were saved in a different directory in the same bucket. To authenticate the login to Weights and Biases automatically
 such that training progress etc. could be logged, we used gcloud secret manager to securely obtain the api key.
 
 ## Deployment
@@ -538,7 +538,7 @@ We performed unit testing on the API. We downloaded some external (not part of o
 >
 > Answer:
 
-We did not manage to implement monitoring. However, it would be crucial for maintaining reliability and performance over time. One thing that can be monitored is data drifting, where you can be alerted when data distributions change such that measures can be taken, e.g. retraining the model. Data distributions can be image sizes, class labels, or it could be more abstract such as NN layer activations or derived features of the images. Model performance can also be tracked such that we can see how well our model performs. GCP resources and billing could also be monitored such that changes to the infrastructure can be done when needed. 
+We did not manage to implement monitoring. However, it would be crucial for maintaining reliability and performance over time. One thing that can be monitored is data drifting, where you can be alerted when data distributions change such that measures can be taken, e.g. retraining the model. Data distributions can be image sizes, class labels, or it could be more abstract such as NN layer activations or derived features of the images. Model performance can also be tracked such that we can see how well our model performs. GCP resources and billing could also be monitored such that changes to the infrastructure can be done when needed.
 
 ## Overall discussion of project
 
@@ -617,7 +617,7 @@ Our workflow starts of local development, during which we may run our code to de
 >
 > Answer:
 
-A significant portion of the time spent on this project was spent trying to make different Google cloud services work 
+A significant portion of the time spent on this project was spent trying to make different Google cloud services work
 as well as making them work with each other. An example of this is the model training process using Vertex AI. A lot
 of effort was spent in determining the most efficient way to handle and access the training data using Cloud storage
 as well as how to securely automate login authentication for Wandb using Cloud secret manager. For many of these
@@ -650,6 +650,6 @@ Student s214743 was in charge of the following. Setting up the initial cookie cu
 
 Student s214706 [fill out]
 
-Student s214681 [fill out]
+Student s214681 implemented hydra functionality in the project to ensure reproducibility with Wandb logging. Set up pre-commit.
 
 All group members actively participated in discussions to resolve project issues and ensure smooth collaboration throughout the process. Some have used ChatGPT as code inspiration e.g. for which functions from library X would be suitable for a given task or quick documentation on function Y from library Z.
