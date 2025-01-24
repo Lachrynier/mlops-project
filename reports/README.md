@@ -527,7 +527,7 @@ We performed unit testing on the API. We downloaded some external (not part of o
 >
 > Answer:
 
-We ended up using (subject to change) $2.40 in credits. Vertex AI (expensive computational resources) was the most expensive followed by Cloud Run (long uptime) and Cloud Storage (a lot of data transfer). Working in the cloud has both pros and cons. Pros are it is easy scale up and not have to worry about hardware. It is flexible and has convenient services for a lot of things. Cons are that it can be annoying to integrate all things and make different services and external platforms communicate. It is also weird how you cannot set a cap on the billing amount, but only set notifications for when limits are reached. This was not really a concern for us with the free credits. However, if one inserted their credit card then they would have to be extremely cautious and constantly monitor GCP and somehow indirectly set limits as GCP does not allow it.
+We ended up using (subject to change) $2.40 in credits. Vertex AI (expensive computational resources) was the most expensive followed by Cloud Run (long uptime) and Cloud Storage (a lot of data transfer). Working in the cloud has both pros and cons. Pros are it is easy scale up and not have to worry about hardware. It is flexible and has convenient services for a lot of things. Cons are that it can be annoying to integrate all things and make different services and external platforms communicate. It is also weird how you cannot set a cap on the billing amount, but only set notifications for when limits are reached. This was not really a concern for us with the free credits. However, if one inserted their credit card then they would have to be extremely cautious and constantly monitor GCP and somehow indirectly set limits as GCP does not have the option.
 
 ### Question 28
 
@@ -543,7 +543,7 @@ We ended up using (subject to change) $2.40 in credits. Vertex AI (expensive com
 >
 > Answer:
 
---- question 28 fill here ---
+We implemented a frontend for our API. It was implemented using streamlit. It has a simple but nice interface for uploading an image, and upon uploading, it will show the image alongside the predicted class and a plot of the probabilities.
 
 ### Question 29
 
