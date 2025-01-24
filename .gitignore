@@ -3,7 +3,8 @@ data/*
 !data/raw_test/
 
 # models dir
-models/
+models/*
+!models/class_names.txt
 
 # hydra output
 outputs/
