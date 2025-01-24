@@ -1,8 +1,7 @@
 # config_cpu.yaml
 workerPoolSpecs:
     machineSpec:
-        machineType: n1-highcpu-16
+        machineType: n1-standard-32
     replicaCount: 1
     containerSpec:
         imageUri: europe-west1-docker.pkg.dev/mlops-project-77/proj-artifacts/train:latest
-
