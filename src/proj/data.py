@@ -146,9 +146,9 @@ def preprocess_subset(
     torch.save(TensorDataset(test_images, test_labels), processed_dir / f"subset{num_classes}_test.pt")
 
 
-def main(num_classes: int = None, download: bool = True):
+def main(num_classes: int = None, download: bool = True, raw_dir: str = "data/raw"):
     """Preprocess dataset."""
-    preprocess_subset(raw_dir="data/raw", processed_dir="data/processed", num_classes=num_classes, download=download)
+    preprocess_subset(raw_dir=raw_dir, processed_dir="data/processed", num_classes=num_classes, download=download)
 
 
 if __name__ == "__main__":

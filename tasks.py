@@ -3,14 +3,17 @@ import glob
 
 from invoke import Context, task
 
+# Fix annoying bug https://github.com/pyinvoke/invoke/issues/833
+import inspect
+
 WINDOWS = os.name == "nt"
 PROJECT_NAME = "proj"
 PYTHON_VERSION = "3.11"
 
-# Fix annoying bug https://github.com/pyinvoke/invoke/issues/833
-import inspect
-if not hasattr(inspect, 'getargspec'):
+
+if not hasattr(inspect, "getargspec"):
     inspect.getargspec = inspect.getfullargspec
+
 
 # Setup commands
 @task
@@ -22,6 +25,7 @@ def create_environment(ctx: Context) -> None:
         pty=not WINDOWS,
     )
 
+
 @task
 def all_requirements(ctx: Context) -> None:
     """Install project requirements."""
@@ -31,15 +35,32 @@ def all_requirements(ctx: Context) -> None:
         ctx.run(f"pip install -r {requirements_file}", echo=True, pty=not WINDOWS)
     ctx.run("pip install -e .", echo=True, pty=not WINDOWS)
 
+
 @task
-def requirements(ctx: Context) -> None:
+def api_requirements(ctx: Context) -> None:
+    """Install project requirements."""
+    ctx.run("pip install -U pip setuptools wheel", echo=True, pty=not WINDOWS)
+    ctx.run("pip install -r requirements_api.txt", echo=True, pty=not WINDOWS)
+    ctx.run("pip install -e .", echo=True, pty=not WINDOWS)
+
+
+@task
+def frontend_requirements(ctx: Context) -> None:
+    """Install project requirements."""
+    ctx.run("pip install -U pip setuptools wheel", echo=True, pty=not WINDOWS)
+    ctx.run("pip install -r requirements_frontend.txt", echo=True, pty=not WINDOWS)
+    ctx.run("pip install -e .", echo=True, pty=not WINDOWS)
+
+
+@task
+def train_requirements(ctx: Context) -> None:
     """Install project requirements."""
     ctx.run("pip install -U pip setuptools wheel", echo=True, pty=not WINDOWS)
     ctx.run("pip install -r requirements.txt", echo=True, pty=not WINDOWS)
     ctx.run("pip install -e .", echo=True, pty=not WINDOWS)
 
 
-@task(requirements)
+@task
 def dev_requirements(ctx: Context) -> None:
     """Install development requirements."""
     ctx.run('pip install -e .["dev"]', echo=True, pty=not WINDOWS)

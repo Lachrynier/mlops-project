@@ -6,12 +6,23 @@ import os
 import hydra
 import torch
 import torch.nn as nn
+import wandb
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
+from google.cloud import secretmanager
 from pathlib import Path
 
-import wandb
+
+# get wandb api key with gcloud secrets
+project_id = "mlops-project-77"
+secret_id = "WANDB_API_KEY"
+client = secretmanager.SecretManagerServiceClient()
+secret_version_name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
+response = client.access_secret_version(name=secret_version_name)
+secret_key = response.payload.data.decode()
+
+wandb.login(key=secret_key)
 
 
 @hydra.main(config_path="../../configs/hydra", config_name="config", version_base=None)
@@ -57,10 +68,6 @@ def train(cfg: DictConfig):
     optimizer = instantiate(cfg.optimizer, params=model.parameters())
     criterion = nn.CrossEntropyLoss()
 
-    # arrays for plotting train loss and accuracy
-    train_loss = []
-    train_accuracy = []
-
     print("Training")
     model.train()
 
@@ -71,11 +78,9 @@ def train(cfg: DictConfig):
             optimizer.zero_grad()
             output = model(images)
             loss = criterion(output, labels)
-            train_loss.append(loss.item())
 
             predictions = output.argmax(dim=1)
             accuracy = (predictions == labels).float().mean().item()
-            train_accuracy.append(accuracy)
 
             loss.backward()
             optimizer.step()
@@ -84,15 +89,16 @@ def train(cfg: DictConfig):
             wandb.log({"train_loss": loss.item(), "train_accuracy": accuracy})
 
     # save weights and log with wandb
-    os.makedirs("models", exist_ok=True)
-    torch.save(model.state_dict(), f"models/{cfg.model_name}.pt")
-    artifact.add_file(f"models/{cfg.model_name}.pt")
+    root = Path("./")
+
+    if Path("/gcs/data_bucket_77").exists():
+        root = Path("/gcs/data_bucket_77")
+
+    os.makedirs(root / "models", exist_ok=True)
+    torch.save(model.state_dict(), root / f"models/{cfg.model_name}.pt")
+    artifact.add_file(root / f"models/{cfg.model_name}.pt")
     run.log_artifact(artifact)
     run.finish()
-
-    # plot code:
-    # os.makedirs("reports/figures", exist_ok=True)
-    # ...
 
 
 if __name__ == "__main__":

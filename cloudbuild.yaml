@@ -3,6 +3,7 @@ steps:
 # Build train, api and frontend images
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Build train image'
+  waitFor: '-'
   args: [
     'build',
     '.',
@@ -14,6 +15,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Build api image'
+  waitFor: '-'
   args: [
     'build',
     '.',
@@ -25,6 +27,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Build frontend image'
+  waitFor: '-'
   args: [
     'build',
     '.',
@@ -37,6 +40,7 @@ steps:
 # Push train, api and frontend images
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Push train image'
+  waitFor: 'Build train image'
   args: [
     'push',
     'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/train'
@@ -44,6 +48,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Push api image'
+  waitFor: 'Build api image'
   args: [
     'push',
     'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/api'
@@ -51,10 +56,77 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Push frontend image'
+  waitFor: 'Build frontend image'
   args: [
     'push',
     'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/frontend'
   ]
 
+
+# Submit and wait for training job
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'Submit to Vertex AI'
+  waitFor: 'Push train image'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      JOB_ID=$(gcloud ai custom-jobs create \
+        --region=europe-west1 \
+        --display-name=production-run \
+        --service-account=658849725274-compute@developer.gserviceaccount.com \
+        --config=config_vertex.yaml \
+        --format="value(name)")
+      echo "Job ID: $${JOB_ID}"
+      echo $$JOB_ID > /workspace/job_id.txt
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'Wait for Vertex AI'
+  waitFor: "Submit to Vertex AI"
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      JOB_ID=$(cat /workspace/job_id.txt)
+      while true; do
+        STATUS=$(gcloud ai custom-jobs describe $${JOB_ID} --region=europe-west1 --format="value(state)")
+        echo "Current Status: $${STATUS}"
+        if [[ "$$STATUS" == "JOB_STATE_SUCCEEDED" ]]; then
+          exit 0
+        elif [[ "$$STATUS" == "JOB_STATE_FAILED" || "$$STATUS" == "JOB_STATE_CANCELLED" ]]; then
+          exit 1
+        fi
+        sleep 30
+      done
+
+# Deploy api and frontend images
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'Deploy backend service'
+  waitFor: 'Wait for Vertex AI'
+  args: [
+    'run',
+    'deploy',
+    'backend',
+    '--image=europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/api:latest',
+    '--region=europe-west1',
+    '--platform=managed',
+    '--add-volume=name=gcs,type=cloud-storage,bucket=data_bucket_77',
+    '--add-volume-mount=volume=gcs,mount-path=/gcs'
+  ]
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'Deploy frontend service'
+  waitFor: 'Wait for Vertex AI'
+  args: [
+    'run',
+    'deploy',
+    'frontend',
+    '--image=europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/frontend:latest',
+    '--region=europe-west1',
+    '--platform=managed',
+  ]
+
 options:
   logging: CLOUD_LOGGING_ONLY
+
+timeout: 43200s
