@@ -15,10 +15,12 @@ from proj.model import create_model
 from proj.data import TRANSFORM
 
 
-def create_app(architecture: str, num_classes: int):
+@hydra.main(config_path="../../configs/hydra", config_name="config", version_base=None)
+def create_app(cfg: DictConfig):
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    num_classes = cfg.model.num_classes
+
     model = create_model(num_classes=num_classes).to(device)
-    model_name = f"{architecture}_c{num_classes}"
 
     model = None
     class_names = None
@@ -32,7 +34,7 @@ def create_app(architecture: str, num_classes: int):
         if Path("/gcs").exists():
             root = Path("/gcs")
 
-        state_dict = torch.load(root / f"models/{model_name}.pt", map_location=device, weights_only=True)
+        state_dict = torch.load(root / f"models/{cfg.model_name}.pt", map_location=device, weights_only=True)
 
         model = create_model(num_classes=num_classes).to(device)
         model.load_state_dict(state_dict)
@@ -79,13 +81,8 @@ def create_app(architecture: str, num_classes: int):
     return app
 
 
-@hydra.main(config_path="../../configs/hydra", config_name="config", version_base=None)
-def main(cfg: DictConfig):
-    app = create_app(cfg.model.architecture, cfg.model.num_classes)
+if __name__ == "__main__":
+    app = create_app()
 
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port, lifespan="on")
-
-
-if __name__ == "__main__":
-    main()
