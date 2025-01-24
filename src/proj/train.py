@@ -2,7 +2,6 @@
 
 import os
 
-# from proj.model import create_model
 import hydra
 import torch
 import torch.nn as nn
@@ -35,7 +34,6 @@ def train(cfg: DictConfig):
 
     run = wandb.init(
         project=cfg.wandb.project,
-        # config={"lr": lr, "batch_size": batch_size, "epochs": epochs},
         entity=cfg.wandb.entity,
         job_type="train",
         config=config,
@@ -44,7 +42,6 @@ def train(cfg: DictConfig):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(cfg.seed)
 
-    # model = create_model(num_classes=10).to(device)
     model = instantiate(cfg.model).to(device)
 
     artifact = wandb.Artifact(
