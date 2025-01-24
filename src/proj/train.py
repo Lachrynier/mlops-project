@@ -18,7 +18,6 @@ import wandb
 def train(cfg: DictConfig):
     """Train a model on MNIST."""
     print(f"### Configuration: \n{OmegaConf.to_yaml(cfg, resolve=True)}")
-    print(OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True))
     config = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
 
     num_classes = cfg.model.num_classes
@@ -37,9 +36,8 @@ def train(cfg: DictConfig):
     # model = create_model(num_classes=10).to(device)
     model = instantiate(cfg.model).to(device)
 
-    model_name = f"{cfg.model.architecture}_c{num_classes}"
     artifact = wandb.Artifact(
-        name=model_name,
+        name=cfg.model_name,
         type="Model",
         description=f"A model trained to classify {cfg.model.num_classes} classes from Caltech256.",
         metadata={"pretrained": cfg.model.pretrained},
@@ -87,8 +85,8 @@ def train(cfg: DictConfig):
 
     # save weights and log with wandb
     os.makedirs("models", exist_ok=True)
-    torch.save(model.state_dict(), f"models/{model_name}.pt")
-    artifact.add_file(f"models/{model_name}.pt")
+    torch.save(model.state_dict(), f"models/{cfg.model_name}.pt")
+    artifact.add_file(f"models/{cfg.model_name}.pt")
     run.log_artifact(artifact)
     run.finish()
 

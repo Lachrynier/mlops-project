@@ -6,9 +6,10 @@ RUN apt update && \
 
 COPY requirements.txt .
 COPY pyproject.toml .
-COPY src/ src/
+COPY src src/
+COPY configs configs/
 COPY data/processed/ data/processed/
-COPY configs/ configs/
+
 
 WORKDIR /
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
