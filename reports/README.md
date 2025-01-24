@@ -430,7 +430,7 @@ A screenshot of the GCP artifact registry can be seen here (subject to change?):
 >
 > Answer:
 
-A screenshot of the GCP Cloud Build history can be seen here (subject to change?): [link](figures/registry.png)
+A screenshot of the GCP Cloud Build history can be seen here (subject to change?): [link](figures/build.png)
 
 ### Question 22
 
