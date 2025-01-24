@@ -648,7 +648,7 @@ Cloud Build, training the model with Vertex AI, logging with Wandb and answering
 
 Student s214743 was in charge of the following. Setting up the initial cookie cutter project; GitHub repo; setting DVC up; setting up GCP. Contributed to the following: preprocessing data, backend inference API, tests, workflows, invoke commands, setting up Cloud Storage bucket, Cloud Build (triggers), dockerfiles, Cloud Run deployment, answering the questions in this report, making the different services communicate and probably more.
 
-Student s214706 [fill out]
+Student s214706 wrote the frontend and the `Caltech256` dataset class. s214706 made sure all systems and platforms worked together and was in charge of the deployment pipeline.
 
 Student s214681 implemented hydra functionality in the project to ensure reproducibility with Wandb logging. Set up pre-commit.
 
