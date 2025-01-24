@@ -6,6 +6,7 @@ RUN apt update && \
 
 COPY requirements_frontend.txt requirements_frontend.txt
 COPY pyproject.toml pyproject.toml
+COPY configs/ configs/
 COPY src src/
 
 RUN pip install -r requirements_frontend.txt --no-cache-dir --verbose

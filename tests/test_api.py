@@ -1,13 +1,24 @@
 import os
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from proj.api import app
+from omegaconf import DictConfig
+import pytest
+
+import proj.api
+
 
 IMAGE_ROOT = "./tests/images/"
 EPSILON = 1e-3
 
 
-def test_image_predictions():
+@pytest.fixture(scope="module")
+def app(cfg: DictConfig):
+    return proj.api.create_app(cfg.model.architecture, cfg.model.num_classes)
+
+
+def test_image_predictions(app: FastAPI):
     """Test predictions for all images in the IMAGE_ROOT directory."""
+
     with TestClient(app) as client:
         assert os.path.exists(IMAGE_ROOT), f"Directory not found: {IMAGE_ROOT}"
 

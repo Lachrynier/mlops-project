@@ -9,6 +9,7 @@ import torch.nn as nn
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
+from pathlib import Path
 
 import wandb
 
@@ -32,7 +33,7 @@ def train(cfg: DictConfig):
     torch.manual_seed(cfg.seed)
 
     # model = create_model(num_classes=10).to(device)
-    model = instantiate(cfg.model)
+    model = instantiate(cfg.model).to(device)
 
     model_name = f"{cfg.model.architecture}_c{num_classes}"
     artifact = wandb.Artifact(
@@ -42,8 +43,10 @@ def train(cfg: DictConfig):
         metadata={"pretrained": cfg.model.pretrained},
     )
 
+    data_dir = Path(cfg.data_dir)
+
     try:
-        train_dataset = torch.load(f"data/processed/subset{num_classes}_train.pt", weights_only=False)
+        train_dataset = torch.load(data_dir / f"subset{num_classes}_train.pt", weights_only=False)
     except FileNotFoundError as e:
         e.strerror = f"""The dataset .pt file could not be found.\n
         Please run 'python src/proj/data.py --num-classes {num_classes}' from an activated python environment."""
@@ -62,7 +65,7 @@ def train(cfg: DictConfig):
     model.train()
 
     for epoch in range(cfg.epochs):
-        for images, labels in tqdm(train_dataloader, desc=f"Epoch: {epoch + 1}"):
+        for images, labels in tqdm(train_dataloader, desc=f"Epoch: {epoch + 1}", disable=not cfg.print_progress):
             images, labels = images.to(device), labels.to(device)
 
             optimizer.zero_grad()
