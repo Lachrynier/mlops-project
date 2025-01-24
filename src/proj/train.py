@@ -18,7 +18,6 @@ import wandb
 def train(cfg: DictConfig):
     """Train a model on MNIST."""
     print(f"### Configuration: \n{OmegaConf.to_yaml(cfg, resolve=True)}")
-    print(OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True))
     config = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
 
     num_classes = cfg.model.num_classes
