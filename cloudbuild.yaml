@@ -1,6 +1,8 @@
 steps:
+
+# Build train, api and frontend images
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'Build container image'
+  id: 'Build train image'
   args: [
     'build',
     '.',
@@ -9,14 +11,9 @@ steps:
     '-f',
     './dockerfiles/train.dockerfile'
   ]
+
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'Push container image'
-  args: [
-    'push',
-    'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/train'
-  ]
-- name: 'gcr.io/cloud-builders/docker'
-  id: 'Build container image 2'
+  id: 'Build api image'
   args: [
     'build',
     '.',
@@ -25,11 +22,39 @@ steps:
     '-f',
     './dockerfiles/api.dockerfile'
   ]
+
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'Push container image 2'
+  id: 'Build frontend image'
+  args: [
+    'build',
+    '.',
+    '-t',
+    'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/frontend',
+    '-f',
+    './dockerfiles/frontend.dockerfile'
+  ]
+
+# Push train, api and frontend images
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push train image'
+  args: [
+    'push',
+    'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/train'
+  ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push api image'
   args: [
     'push',
     'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/api'
   ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push frontend image'
+  args: [
+    'push',
+    'europe-west1-docker.pkg.dev/$PROJECT_ID/proj-artifacts/frontend'
+  ]
+
 options:
   logging: CLOUD_LOGGING_ONLY

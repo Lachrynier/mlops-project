@@ -3,6 +3,7 @@
 import tarfile
 from collections.abc import Callable
 from pathlib import Path
+import re
 
 import requests
 import torch
@@ -93,6 +94,18 @@ class Caltech256(Dataset):
             target = self.target_transform(target)
 
         return image, target
+
+    def class_names(self) -> list[str]:
+        class_names = 257 * [None]
+
+        pattern = "\\.([a-z0-9-]*)\\/."
+        for img, target in zip(self.imgs, self.targets):
+            if class_names[target] is not None:
+                continue
+            match = next(re.finditer(pattern, img))
+            class_names[target] = match.group(1)
+
+        return class_names
 
 
 def preprocess_subset(

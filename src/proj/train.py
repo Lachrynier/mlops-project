@@ -67,7 +67,7 @@ def train(cfg: DictConfig):
     model.train()
 
     for epoch in range(cfg.epochs):
-        for images, labels in tqdm(train_dataloader, desc=f"Epoch: {epoch + 1}"):
+        for images, labels in tqdm(train_dataloader, desc=f"Epoch: {epoch + 1}", disable=not cfg.print_progress):
             images, labels = images.to(device), labels.to(device)
 
             optimizer.zero_grad()

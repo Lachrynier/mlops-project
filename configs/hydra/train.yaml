@@ -8,3 +8,4 @@ lr: ${optimizer.lr}
 batch_size: 32
 epochs: 10
 data_dir: "data/processed"
+print_progress: True

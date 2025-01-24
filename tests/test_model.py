@@ -9,7 +9,7 @@ def test_model():
     num_classes = random.randint(2, 257)
     model = create_model(num_classes=num_classes).to(device)
 
-    input = torch.randn(1, 3, 28, 28, device=device)
+    input = torch.randn(1, 3, 224, 224, device=device)
 
     model.eval()
     output = model(input)
