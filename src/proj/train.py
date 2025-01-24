@@ -6,12 +6,24 @@ import os
 import hydra
 import torch
 import torch.nn as nn
+import wandb
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
+from google.cloud import secretmanager
 
-import wandb
+from proj.data import Caltech256, TRANSFORM
 
+
+#get wandb api key with gcloud secrets
+project_id = "mlops-project-77"
+secret_id = "WANDB_API_KEY"
+client = secretmanager.SecretManagerServiceClient()
+secret_version_name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
+response = client.access_secret_version(name=secret_version_name)
+secret_key = response.payload.data.decode()
+
+wandb.login(key = secret_key)
 
 @hydra.main(config_path="../../configs/hydra", config_name="config", version_base=None)
 def train(cfg: DictConfig):
@@ -42,21 +54,23 @@ def train(cfg: DictConfig):
         metadata={"pretrained": cfg.model.pretrained},
     )
 
-    try:
-        train_dataset = torch.load(f"data/processed/subset{num_classes}_train.pt", weights_only=False)
-    except FileNotFoundError as e:
-        e.strerror = f"""The dataset .pt file could not be found.\n
-        Please run 'python src/proj/data.py --num-classes {num_classes}' from an activated python environment."""
-        raise e
+
+    # For training locally with .pt files
+    # try:
+    #     train_dataset = torch.load(f"data/processed/subset{num_classes}_train.pt", weights_only=False)
+    # except FileNotFoundError as e:
+    #     e.strerror = f"""The dataset .pt file could not be found.\n
+    #     Please run 'python src/proj/data.py --num-classes {num_classes}' from an activated python environment."""
+    #     raise e
+
+    # For training with vertex AI in GCP with .tar file
+    train_dataset = Caltech256('gcs/data_bucket_77/data/raw', transform=TRANSFORM)
+
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
 
     optimizer = instantiate(cfg.optimizer, params=model.parameters())
     criterion = nn.CrossEntropyLoss()
-
-    # arrays for plotting train loss and accuracy
-    train_loss = []
-    train_accuracy = []
 
     print("Training")
     model.train()
@@ -68,11 +82,9 @@ def train(cfg: DictConfig):
             optimizer.zero_grad()
             output = model(images)
             loss = criterion(output, labels)
-            train_loss.append(loss.item())
 
             predictions = output.argmax(dim=1)
             accuracy = (predictions == labels).float().mean().item()
-            train_accuracy.append(accuracy)
 
             loss.backward()
             optimizer.step()
@@ -86,10 +98,8 @@ def train(cfg: DictConfig):
     artifact.add_file(f"models/{model_name}.pt")
     run.log_artifact(artifact)
 
-    # plot code:
-    # os.makedirs("reports/figures", exist_ok=True)
-    # ...
-
+    # Save weights in gcloud storage
+    torch.save(model.state_dict(), 'gcs/data_bucket_77/models/model_test2.pth')
 
 if __name__ == "__main__":
     train()

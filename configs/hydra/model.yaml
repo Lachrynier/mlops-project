@@ -2,4 +2,4 @@ model:
   _target_: proj.model.create_model
   architecture: resnet50.a1_in1k
   pretrained: False
-  num_classes: 10
+  num_classes: 257

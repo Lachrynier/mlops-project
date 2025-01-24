@@ -6,4 +6,4 @@ optimizer:
   weight_decay: 0
 lr: ${optimizer.lr}
 batch_size: 32
-epochs: 10
+epochs: 1

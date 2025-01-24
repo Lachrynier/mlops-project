@@ -8,11 +8,13 @@ RUN apt update && \
 COPY requirements.txt .
 COPY pyproject.toml .
 COPY src/ src/
-COPY data/processed/ data/processed/
+# mount data from GCS bucket for training with vertex AI
+# COPY data/processed/ data/processed/
 COPY configs/ configs/
 
 WORKDIR /
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+# RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache-dir
 RUN pip install . --no-deps --no-cache-dir
 
 ENTRYPOINT ["python", "-u", "src/proj/train.py"]
