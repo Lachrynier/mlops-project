@@ -13,7 +13,7 @@ EPSILON = 1e-3
 
 @pytest.fixture(scope="module")
 def app(cfg: DictConfig):
-    return proj.api.create_app(cfg.model.architecture, cfg.model.num_classes)
+    return proj.api.create_app(cfg)
 
 
 def test_image_predictions(app: FastAPI):

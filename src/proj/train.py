@@ -14,7 +14,7 @@ from google.cloud import secretmanager
 from pathlib import Path
 
 
-#get wandb api key with gcloud secrets
+# get wandb api key with gcloud secrets
 project_id = "mlops-project-77"
 secret_id = "WANDB_API_KEY"
 client = secretmanager.SecretManagerServiceClient()
@@ -22,13 +22,13 @@ secret_version_name = f"projects/{project_id}/secrets/{secret_id}/versions/lates
 response = client.access_secret_version(name=secret_version_name)
 secret_key = response.payload.data.decode()
 
-wandb.login(key = secret_key)
+wandb.login(key=secret_key)
+
 
 @hydra.main(config_path="../../configs/hydra", config_name="config", version_base=None)
 def train(cfg: DictConfig):
     """Train a model on MNIST."""
     print(f"### Configuration: \n{OmegaConf.to_yaml(cfg, resolve=True)}")
-    print(OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True))
     config = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
 
     num_classes = cfg.model.num_classes
@@ -47,9 +47,8 @@ def train(cfg: DictConfig):
     # model = create_model(num_classes=10).to(device)
     model = instantiate(cfg.model).to(device)
 
-    model_name = f"{cfg.model.architecture}_c{num_classes}"
     artifact = wandb.Artifact(
-        name=model_name,
+        name=cfg.model_name,
         type="Model",
         description=f"A model trained to classify {cfg.model.num_classes} classes from Caltech256.",
         metadata={"pretrained": cfg.model.pretrained},
@@ -96,8 +95,8 @@ def train(cfg: DictConfig):
         root = Path("/gcs/data_bucket_77")
 
     os.makedirs(root / "models", exist_ok=True)
-    torch.save(model.state_dict(), root / f"models/{model_name}.pt")
-    artifact.add_file(root / f"models/{model_name}.pt")
+    torch.save(model.state_dict(), root / f"models/{cfg.model_name}.pt")
+    artifact.add_file(root / f"models/{cfg.model_name}.pt")
     run.log_artifact(artifact)
     run.finish()
 
