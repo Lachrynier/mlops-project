@@ -592,4 +592,8 @@ We implemented a frontend for our API. It was implemented using streamlit. It ha
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+Student s214727 [fill out]
+Student s214743 was in charge of the following. Setting up the initial cookie cutter project; GitHub repo; setting DVC up; setting up GCP. Contributed to the following: preprocessing data, backend inference API, tests, workflows, invoke commands, setting up Cloud Storage bucket, Cloud Build (triggers), dockerfiles, Cloud Run deployment, answering the questions in this report, making the different services communicate and probably more.
+Student s214706 [fill out]
+Student s214681 [fill out]
+All group members actively participated in discussions to resolve project issues and ensure smooth collaboration throughout the process. Some have used ChatGPT as code inspiration e.g. for which functions from library X would be suitable for a given task or quick documentation on function Y from library Z.
