@@ -1,0 +1,4 @@
+google-cloud-run==0.10.14
+streamlit==1.41.1
+requests==2.32.3
+pandas==2.2.3

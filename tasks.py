@@ -1,4 +1,5 @@
 import os
+import glob
 
 from invoke import Context, task
 
@@ -6,17 +7,29 @@ WINDOWS = os.name == "nt"
 PROJECT_NAME = "proj"
 PYTHON_VERSION = "3.11"
 
+# Fix annoying bug https://github.com/pyinvoke/invoke/issues/833
+import inspect
+if not hasattr(inspect, 'getargspec'):
+    inspect.getargspec = inspect.getfullargspec
 
 # Setup commands
 @task
 def create_environment(ctx: Context) -> None:
     """Create a new conda environment for project."""
     ctx.run(
-        f"conda create --name {PROJECT_NAME} python={PYTHON_VERSION} pip --no-default-packages --yes",
+        f"conda create --name {PROJECT_NAME} python={PYTHON_VERSION} pip invoke --no-default-packages --yes",
         echo=True,
         pty=not WINDOWS,
     )
 
+@task
+def all_requirements(ctx: Context) -> None:
+    """Install project requirements."""
+    ctx.run("pip install -U pip setuptools wheel", echo=True, pty=not WINDOWS)
+    requirements_files = glob.glob("requirements*.txt")
+    for requirements_file in requirements_files:
+        ctx.run(f"pip install -r {requirements_file}", echo=True, pty=not WINDOWS)
+    ctx.run("pip install -e .", echo=True, pty=not WINDOWS)
 
 @task
 def requirements(ctx: Context) -> None:
@@ -50,6 +63,30 @@ def test(ctx: Context) -> None:
     """Run tests."""
     ctx.run("coverage run -m pytest tests/", echo=True, pty=not WINDOWS)
     ctx.run("coverage report -m", echo=True, pty=not WINDOWS)
+
+
+@task
+def generate_test_dataset(ctx: Context, classes: int = 5, images_per_class: int = 2) -> None:
+    """Generate a reduced dataset for unit tests"""
+    import proj.data
+    import tarfile
+
+    os.makedirs("data/raw_test", exist_ok=True)
+    tar = tarfile.open("data/raw_test/256_ObjectCategories.tar", "w|")
+    dataset = proj.data.Caltech256("data/raw", download=True)
+
+    selected_counts = classes * [0]
+
+    for img, target in zip(dataset.imgs, dataset.targets):
+        if target >= classes:
+            continue
+
+        if selected_counts[target] >= images_per_class:
+            continue
+
+        member = dataset.tar.getmember(img)
+        tar.addfile(member, dataset.tar.extractfile(member))
+        selected_counts[target] += 1
 
 
 @task

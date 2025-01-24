@@ -1,4 +1,3 @@
-# Base image
 FROM python:3.11-slim
 
 RUN apt update && \
@@ -8,8 +7,6 @@ RUN apt update && \
 COPY requirements.txt .
 COPY pyproject.toml .
 COPY src/ src/
-# mount data from GCS bucket for training with vertex AI
-# COPY data/processed/ data/processed/
 COPY configs/ configs/
 
 WORKDIR /
@@ -17,4 +14,4 @@ WORKDIR /
 RUN pip install -r requirements.txt --no-cache-dir
 RUN pip install . --no-deps --no-cache-dir
 
-ENTRYPOINT ["python", "-u", "src/proj/train.py"]
+ENTRYPOINT ["sh", "-c", "python -u src/proj/data.py --raw-dir=/gcs/data_bucket_77/data/raw && python -u src/proj/train.py"]

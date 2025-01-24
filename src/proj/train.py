@@ -11,8 +11,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
 from google.cloud import secretmanager
-
-from proj.data import Caltech256, TRANSFORM
+from pathlib import Path
 
 
 #get wandb api key with gcloud secrets
@@ -29,7 +28,8 @@ wandb.login(key = secret_key)
 def train(cfg: DictConfig):
     """Train a model on MNIST."""
     print(f"### Configuration: \n{OmegaConf.to_yaml(cfg, resolve=True)}")
-    wandb.config = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
+    print(OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True))
+    config = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
 
     num_classes = cfg.model.num_classes
 
@@ -38,13 +38,14 @@ def train(cfg: DictConfig):
         # config={"lr": lr, "batch_size": batch_size, "epochs": epochs},
         entity=cfg.wandb.entity,
         job_type="train",
+        config=config,
     )
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(cfg.seed)
 
     # model = create_model(num_classes=10).to(device)
-    model = instantiate(cfg.model)
+    model = instantiate(cfg.model).to(device)
 
     model_name = f"{cfg.model.architecture}_c{num_classes}"
     artifact = wandb.Artifact(
@@ -54,18 +55,14 @@ def train(cfg: DictConfig):
         metadata={"pretrained": cfg.model.pretrained},
     )
 
+    data_dir = Path(cfg.data_dir)
 
-    # For training locally with .pt files
-    # try:
-    #     train_dataset = torch.load(f"data/processed/subset{num_classes}_train.pt", weights_only=False)
-    # except FileNotFoundError as e:
-    #     e.strerror = f"""The dataset .pt file could not be found.\n
-    #     Please run 'python src/proj/data.py --num-classes {num_classes}' from an activated python environment."""
-    #     raise e
-
-    # For training with vertex AI in GCP with .tar file
-    train_dataset = Caltech256('gcs/data_bucket_77/data/raw', transform=TRANSFORM)
-
+    try:
+        train_dataset = torch.load(data_dir / f"subset{num_classes}_train.pt", weights_only=False)
+    except FileNotFoundError as e:
+        e.strerror = f"""The dataset .pt file could not be found.\n
+        Please run 'python src/proj/data.py --num-classes {num_classes}' from an activated python environment."""
+        raise e
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=cfg.batch_size, shuffle=True)
 
@@ -76,7 +73,7 @@ def train(cfg: DictConfig):
     model.train()
 
     for epoch in range(cfg.epochs):
-        for images, labels in tqdm(train_dataloader, desc=f"Epoch: {epoch + 1}"):
+        for images, labels in tqdm(train_dataloader, desc=f"Epoch: {epoch + 1}", disable=not cfg.print_progress):
             images, labels = images.to(device), labels.to(device)
 
             optimizer.zero_grad()
@@ -93,13 +90,17 @@ def train(cfg: DictConfig):
             wandb.log({"train_loss": loss.item(), "train_accuracy": accuracy})
 
     # save weights and log with wandb
-    os.makedirs("models", exist_ok=True)
-    torch.save(model.state_dict(), f"models/{model_name}.pt")
-    artifact.add_file(f"models/{model_name}.pt")
-    run.log_artifact(artifact)
+    root = Path("./")
 
-    # Save weights in gcloud storage
-    torch.save(model.state_dict(), 'gcs/data_bucket_77/models/model_test2.pth')
+    if Path("/gcs/data_bucket_77").exists():
+        root = Path("/gcs/data_bucket_77")
+
+    os.makedirs(root / "models", exist_ok=True)
+    torch.save(model.state_dict(), root / f"models/{model_name}.pt")
+    artifact.add_file(root / f"models/{model_name}.pt")
+    run.log_artifact(artifact)
+    run.finish()
+
 
 if __name__ == "__main__":
     train()
