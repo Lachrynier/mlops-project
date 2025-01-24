@@ -341,7 +341,16 @@ We made use of Hydra config files. When an experiment is run, we log to wandb an
 >
 > Answer:
 
---- question 14 fill here ---
+We chose to use Weights & Biases for illustrating the training loss as well as the training accuracy of our model.
+A graph of the training loss can be seen here: [link](figures/train_loss.png).
+A graph of the training accuracy can be seen here: [link](figures/train_accuracy.png).
+
+The evolution of the training loss shows us how the performance of the model improves with the number of training 
+steps by measuring the error between the predicted values and the target values. The training accuracy graph 
+shows us exactly how accurate the model is during training by showing how the percentage of correctly labeled 
+images increases with the number of training steps. As seen on the second image, training accuracy reaches 
+approximately 60% after close to 8000 training steps.
+
 
 ### Question 15
 
