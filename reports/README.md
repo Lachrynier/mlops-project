@@ -445,7 +445,21 @@ A screenshot of the GCP Cloud Build history can be seen here (subject to change?
 >
 > Answer:
 
-Something ... Vertex AI ... Something
+We found Vertex AI the most practical to train the model with, so that is what we decided to use for the project.
+The way we used Vertex AI was by sending custom training jobs. An example command could be:
+```
+gcloud ai custom-jobs create \
+--region=<server> \
+--display-name=<run name> \
+--service-account=<service account email> \
+--config=<config file> \
+```
+Here, we specify a number of practical details of the training job along with which config file to use. In the config 
+file we specify which virtual machine we want to use for running the training job along with which docker image from the 
+artifact repository to load. To access training data for training, we used Cloud Storage as a mounted file system by 
+accessing our data bucket as a subdirectory of the root /gcs directory. Similarly, the weights of the resulting trained 
+model were saved in a different directory in the same bucket. To authenticate the login to Weights and Biases automatically 
+such that training progress etc. could be logged, we used gcloud secret manager to securely obtain the api key.
 
 ## Deployment
 
