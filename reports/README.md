@@ -78,7 +78,7 @@ will check the repositories and the code to verify your answers.
 * [x] Get some continuous integration running on the GitHub repository (M17)
 * [x] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
 * [ ] Add a linting step to your continuous integration (M17)
-* [ ] Add pre-commit hooks to your version control setup (M18)
+* [x] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [x] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
@@ -290,7 +290,7 @@ As our data consists of many files nested in folders, DVC proved to be extremely
 >
 > Answer:
 
-We have a unit testing workflow that tests for multiple operating systems (Windows and Ubuntu) and one could also add another Python version. The workflow can be seen [here](https://github.com/Lachrynier/mlops-project/blob/main/.github/workflows/tests.yaml). We make use of caching with ```cache: 'pip'```. We have an environment set up called ```gcp``` that allows us to authenticate with GCP in the workflow using secrets: ```${{ secrets.GCP_CREDENTIALS }}```. The environment also allows for setting up environment variables. The workflow sets up Google Cloud SDK, sets up Python, installs dependencies from our requirements files and packages our module as editable just like we would do locally. It then runs tests on all test files in our test folder and calculates the code coverage to assess how much of the codebase is being tested. This helps us identify any untested areas and maintain a high level of test coverage over time. The workflow triggers whenever we push to the main branch or make a pull request to the main branch. This ensures that every proposed change is thoroughly tested before being merged into the primary codebase. By automating this process, we eliminate the need for manual testing, which would otherwise be time-consuming and prone to human error.
+We have a unit testing workflow that tests for multiple operating systems (Windows and Ubuntu) and one could also add another Python version. The workflow can be seen [here](https://github.com/Lachrynier/mlops-project/blob/main/.github/workflows/tests.yaml). We make use of caching with ```cache: 'pip'```. We have an environment set up called ```gcp``` that allows us to authenticate with GCP in the workflow using secrets: ```${{ secrets.GCP_CREDENTIALS }}```. The environment also allows for setting up environment variables. The workflow sets up Google Cloud SDK, sets up Python, installs dependencies from our requirements files and packages our module as editable just like we would do locally. It then runs tests on all test files in our test folder and calculates the code coverage to assess how much of the codebase is being tested. This helps us identify any untested areas and maintain a high level of test coverage over time. The workflow triggers whenever we push to the main branch or make a pull request to the main branch. This ensures that every proposed change is thoroughly tested before being merged into the primary codebase. By automating this process, we eliminate the need for manual testing, which would otherwise be time-consuming and prone to human error. For some unit tests (e.g. the one testing our prediction API) we use a very small subset of the dataset to train a model quickly in a `pytest` fixture. This ensures that the training code in any source code revision produces a model that can be used by the API in that same revision.
 
 ## Running code and tracking experiments
 
@@ -356,7 +356,13 @@ We made use of Hydra config files. When an experiment is run, we log to wandb an
 >
 > Answer:
 
-For our project we made docker files for constructing images for training, inference (backend API), and the frontend application. To run ... Here is a link to ...
+We use three different docker images, `train`, `api` and `frontend`, in our project, all of which are part of our deployment pipeline.
+All three images derives from `python:3.11-slim` and includes our source code, but they have different
+python packages installed and different entrypoints:
+- `train`: Most notable packages are `pytorch`, `timm` and `hydra-code`, all necessary to run training. Its entrypoint first preprocesses the data using `data.py` (storing the result in the container) and then runs training using `train.py`
+- `api`: Most notable packages are `pytorch`, `fastapi` and `uvicorn`. Its entrypoint launches `api.py` which in turn launches a server.
+- `frontend`: Most notable packages are `streamlit` and `requests`. Its entrypoint runs `streamlit run frontend.py`, hosting a frontend server.
+The images are separate to optimize size. The `frontend` image, which does not depend on `pytorch`, is only around 13% the size of the others.
 
 ### Question 16
 
@@ -371,7 +377,7 @@ For our project we made docker files for constructing images for training, infer
 >
 > Answer:
 
-We used VS Code's Python Debugger extension and logging/printing. Logging allows us to track the progress of the program. The debugger allows to add breakpoints, step through code, inspect variables, and interact with the program through a debugging terminal. The breakpoints can be configured to only trigger when certain conditions are true, which can be quite useful. Ideally all debugging is done locally as it can be extremely time consuming and tedious to wait for docker files to build or GCP apps to deploy. Profiling ?...
+We used VS Code's Python Debugger extension and logging/printing. Logging allows us to track the progress of the program. The debugger allows to add breakpoints, step through code, inspect variables, and interact with the program through a debugging terminal. The breakpoints can be configured to only trigger when certain conditions are true, which can be quite useful. Ideally all debugging is done locally as it can be extremely time consuming and tedious to wait for docker files to build or GCP apps to deploy. In terms of profiling, we used `cProfile` and `snakeviz` to measure the performance impact of not preprocessing our data and instead performing all transforms while training. When training for one epoch, it took up around a cumulative 70 seconds to extract images from the `tar` archivee, convert them from JPEG and perform transformations on them. This was fine when running on CPU, where an epoch took on the order of 1000 seconds, but a big performance hit when running on GPU, where an only epoch took around 150 seconds. Hence we kept our preprocessing step.
 
 ## Working in the cloud
 
